@@ -4,23 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#14161a" />
-  <title>Card Gacha</title>
+  <title>UNPLED</title>
+
   <link rel="manifest" href="./manifest.webmanifest" />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="./css/styles.css" />
 </head>
 <body>
   <header class="topbar">
     <div class="brand">
       <div class="logo">🃏</div>
       <div>
-        <div class="title">Card Gacha</div>
+        <div class="title">UNPLED</div>
         <div class="sub" id="statusText">Offline-ready</div>
       </div>
     </div>
 
     <div class="wallet">
       <div class="pill">
-        <span class="dot" id="onlineDot" aria-hidden="true"></span>
+        <span class="dot" id="onlineDot"></span>
         <span id="onlineLabel">—</span>
       </div>
       <div class="pill">
@@ -31,127 +32,19 @@
   </header>
 
   <main class="main">
-    <nav class="tabs" role="tablist">
-      <button class="tab active" data-view="play" role="tab">Jogar</button>
-      <button class="tab" data-view="packs" role="tab">Packs</button>
-      <button class="tab" data-view="collection" role="tab">Coleção</button>
+    <nav class="tabs">
+      <button class="tab active" data-view="play">Jogar</button>
+      <button class="tab" data-view="packs">Packs</button>
+      <button class="tab" data-view="collection">Coleção</button>
     </nav>
 
-    <!-- PLAY -->
-    <section class="view active" id="view-play">
-      <div class="card panel">
-        <div class="row between">
-          <div>
-            <h2>Partida</h2>
-            <p class="muted">3 rodadas • compra 5 • joga 4</p>
-          </div>
-          <div class="mini">
-            <div class="kpi">
-              <span class="muted">Rodada</span>
-              <strong id="roundLabel">—</strong>
-            </div>
-            <div class="kpi">
-              <span class="muted">Score</span>
-              <strong id="scoreLabel">0</strong>
-            </div>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="row gap">
-          <button class="btn primary" id="btnStartRun">Nova partida</button>
-          <button class="btn ghost" id="btnResetAll">Reset (debug)</button>
-        </div>
-
-        <div class="spacer"></div>
-
-        <div id="playArea" class="hidden">
-          <div class="row between">
-            <h3>Mão (clique pra selecionar)</h3>
-            <div class="muted"><span id="pickLabel">0</span>/4 selecionadas</div>
-          </div>
-
-          <div class="hand" id="hand"></div>
-
-          <div class="row gap">
-            <button class="btn primary" id="btnPlaySelected">Jogar 4 cartas</button>
-            <button class="btn ghost" id="btnRerollHand" title="Opcional: só pra teste">Recomprar mão (teste)</button>
-          </div>
-
-          <div class="spacer"></div>
-
-          <div class="card result" id="roundResult">
-            <div class="row between">
-              <strong>Resultado da rodada</strong>
-              <span class="muted" id="roundSum">—</span>
-            </div>
-            <div class="muted small" id="roundDetail">—</div>
-          </div>
-        </div>
-
-        <div class="spacer"></div>
-
-        <div class="card panel subtle hidden" id="runEnd">
-          <div class="row between">
-            <div>
-              <strong>Fim da partida</strong>
-              <div class="muted small" id="runSummary">—</div>
-            </div>
-            <button class="btn primary" id="btnClaim">Receber moedas</button>
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- PACKS -->
-    <section class="view" id="view-packs">
-      <div class="card panel">
-        <h2>Packs</h2>
-        <p class="muted">Cada pack tem <strong>3 cartas</strong>. Duplicatas contam!</p>
-
-        <div class="divider"></div>
-
-        <div class="row between">
-          <div class="kpi">
-            <span class="muted">Preço atual</span>
-            <strong id="packCostLabel">—</strong>
-          </div>
-          <button class="btn primary" id="btnBuyPack">Comprar pack</button>
-        </div>
-
-        <div class="spacer"></div>
-
-        <div class="packReveal" id="packReveal">
-          <div class="muted small">Abra um pack pra ver as cartas aqui 👀</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- COLLECTION -->
-    <section class="view" id="view-collection">
-      <div class="card panel">
-        <div class="row between">
-          <div>
-            <h2>Coleção</h2>
-            <p class="muted">Complete sets pra ganhar bônus (fase 2).</p>
-          </div>
-          <div class="kpi">
-            <span class="muted">Únicas</span>
-            <strong id="uniqueCount">—</strong>
-          </div>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="collection" id="collectionGrid"></div>
-      </div>
-    </section>
+    <section class="view active" id="view-play"></section>
+    <section class="view" id="view-packs"></section>
+    <section class="view" id="view-collection"></section>
   </main>
 
   <footer class="footer">
-    <span class="muted small">PWA • Offline • Mobile-first</span>
+    <span class="muted small">UNPLED • PWA • Offline-first</span>
   </footer>
 
   <script type="module" src="./js/app.js"></script>
