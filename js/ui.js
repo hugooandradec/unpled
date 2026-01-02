@@ -18,22 +18,12 @@ export function updateCoins(value) {
 }
 
 // =========================
-// TABS
+// NAVEGAÇÃO ENTRE VIEWS
 // =========================
-export function setupTabs() {
-  const tabs = document.querySelectorAll(".tab");
-  const views = document.querySelectorAll(".view");
-
-  tabs.forEach(tab => {
-    tab.onclick = () => {
-      tabs.forEach(t => t.classList.remove("active"));
-      views.forEach(v => v.classList.remove("active"));
-
-      tab.classList.add("active");
-      const view = document.getElementById(`view-${tab.dataset.view}`);
-      if (view) view.classList.add("active");
-    };
-  });
+export function showView(name) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  const view = document.getElementById(`view-${name}`);
+  if (view) view.classList.add("active");
 }
 
 // =========================
@@ -44,45 +34,29 @@ export function renderHomeView() {
   if (!root) return;
 
   root.innerHTML = `
-    <div class="card panel center">
-      <h1 style="font-size:32px; margin-bottom:6px;">UNPLED</h1>
-      <p class="muted">Um jogo de cartas em construção</p>
+    <div class="card panel">
+      <div style="text-align:center; padding: 6px 0 2px;">
+        <h1 style="font-size:32px; margin:0 0 6px;">UNPLED</h1>
+        <p class="muted" style="margin:0;">Um jogo de cartas em construção</p>
+      </div>
 
       <div class="spacer"></div>
 
-      <button class="btn primary" id="btnGoPlay">
-        Jogar
-      </button>
+      <button class="btn primary" id="btnGoPlay">Jogar</button>
 
       <div class="spacer"></div>
 
-      <button class="btn ghost" id="btnGoCollection">
-        Coleção
-      </button>
+      <button class="btn" id="btnGoCollection">Coleção</button>
 
       <div class="spacer"></div>
 
-      <button class="btn ghost" id="btnGoSettings">
-        Configurações
-      </button>
+      <button class="btn" id="btnGoSettings">Configurações</button>
     </div>
   `;
 }
 
 // =========================
-// NAVEGAÇÃO ENTRE VIEWS
-// =========================
-export function showView(name) {
-  document.querySelectorAll(".view").forEach(v =>
-    v.classList.remove("active")
-  );
-
-  const view = document.getElementById(`view-${name}`);
-  if (view) view.classList.add("active");
-}
-
-// =========================
-// RENDER VIEWS (HTML BASE)
+// PLAY
 // =========================
 export function renderPlayView() {
   const root = document.getElementById("view-play");
@@ -90,14 +64,18 @@ export function renderPlayView() {
 
   root.innerHTML = `
     <div class="card panel">
-      <h2>Partida</h2>
+      <div class="row between">
+        <h2>Partida</h2>
+        <button class="btn ghost" id="btnBackFromPlay" style="width:auto; padding:10px 12px;">
+          Voltar
+        </button>
+      </div>
+
       <p class="muted">Abra packs e monte sua coleção</p>
 
       <div class="divider"></div>
 
-      <button class="btn primary" id="btnOpenPack">
-        Abrir Pack
-      </button>
+      <button class="btn primary" id="btnOpenPack">Abrir Pack</button>
 
       <div class="spacer"></div>
 
@@ -106,40 +84,48 @@ export function renderPlayView() {
   `;
 }
 
-export function renderPacksView() {
-  const root = document.getElementById("view-packs");
-  if (!root) return;
-
-  root.innerHTML = `
-    <div class="card panel">
-      <h2>Packs</h2>
-      <p class="muted">Cada pack contém 3 cartas aleatórias</p>
-
-      <div class="divider"></div>
-
-      <button class="btn primary" id="btnBuyPack">
-        Comprar Pack
-      </button>
-
-      <div class="spacer"></div>
-
-      <div id="packResult" class="packReveal"></div>
-    </div>
-  `;
-}
-
+// =========================
+// COLEÇÃO
+// =========================
 export function renderCollectionView() {
   const root = document.getElementById("view-collection");
   if (!root) return;
 
   root.innerHTML = `
     <div class="card panel">
-      <h2>Coleção</h2>
+      <div class="row between">
+        <h2>Coleção</h2>
+        <button class="btn ghost" id="btnBackFromCollection" style="width:auto; padding:10px 12px;">
+          Voltar
+        </button>
+      </div>
+
       <p class="muted">Suas cartas desbloqueadas</p>
 
       <div class="divider"></div>
 
       <div id="collectionGrid" class="collection"></div>
+    </div>
+  `;
+}
+
+// =========================
+// SETTINGS
+// =========================
+export function renderSettingsView() {
+  const root = document.getElementById("view-settings");
+  if (!root) return;
+
+  root.innerHTML = `
+    <div class="card panel">
+      <div class="row between">
+        <h2>Configurações</h2>
+        <button class="btn ghost" id="btnBackFromSettings" style="width:auto; padding:10px 12px;">
+          Voltar
+        </button>
+      </div>
+
+      <p class="muted">Em breve 😌</p>
     </div>
   `;
 }
