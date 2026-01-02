@@ -37,6 +37,51 @@ export function setupTabs() {
 }
 
 // =========================
+// HOME (MENU INICIAL)
+// =========================
+export function renderHomeView() {
+  const root = document.getElementById("view-home");
+  if (!root) return;
+
+  root.innerHTML = `
+    <div class="card panel center">
+      <h1 style="font-size:32px; margin-bottom:6px;">UNPLED</h1>
+      <p class="muted">Um jogo de cartas em construção</p>
+
+      <div class="spacer"></div>
+
+      <button class="btn primary" id="btnGoPlay">
+        Jogar
+      </button>
+
+      <div class="spacer"></div>
+
+      <button class="btn ghost" id="btnGoCollection">
+        Coleção
+      </button>
+
+      <div class="spacer"></div>
+
+      <button class="btn ghost" id="btnGoSettings">
+        Configurações
+      </button>
+    </div>
+  `;
+}
+
+// =========================
+// NAVEGAÇÃO ENTRE VIEWS
+// =========================
+export function showView(name) {
+  document.querySelectorAll(".view").forEach(v =>
+    v.classList.remove("active")
+  );
+
+  const view = document.getElementById(`view-${name}`);
+  if (view) view.classList.add("active");
+}
+
+// =========================
 // RENDER VIEWS (HTML BASE)
 // =========================
 export function renderPlayView() {
