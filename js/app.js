@@ -3,32 +3,25 @@ import { openPack } from "./gacha.js";
 import {
   setOnlineStatus,
   updateCoins,
-  setupTabs,
+  renderHomeView,
   renderPlayView,
-  renderPacksView,
-  renderCollectionView
+  renderCollectionView,
+  showView
 } from "./ui.js";
 
 let state = loadState();
 
-// =========================
-// INIT
-// =========================
 function init() {
-  // 1️⃣ Renderiza o HTML base das views
+  // Render base
+  renderHomeView();
   renderPlayView();
-  renderPacksView();
   renderCollectionView();
 
-  // 2️⃣ Setup UI
-  setupTabs();
   updateCoins(state.coins);
   setOnlineStatus();
 
-  // 3️⃣ Eventos
-  bindEvents();
+  bindHomeEvents();
 
-  // 4️⃣ Service Worker
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js");
   }
@@ -38,62 +31,57 @@ function init() {
 }
 
 // =========================
-// EVENTS
+// HOME EVENTS
 // =========================
-function bindEvents() {
-  const btnOpenPack = document.getElementById("btnOpenPack");
-  if (btnOpenPack) {
-    btnOpenPack.onclick = handleOpenPack;
-  }
+function bindHomeEvents() {
+  document.getElementById("btnGoPlay")?.addEventListener("click", () => {
+    showView("play");
+  });
 
-  const btnBuyPack = document.getElementById("btnBuyPack");
-  if (btnBuyPack) {
-    btnBuyPack.onclick = handleOpenPack;
-  }
+  document.getElementById("btnGoCollection")?.addEventListener("click", () => {
+    showView("collection");
+  });
+
+  document.getElementById("btnGoSettings")?.addEventListener("click", () => {
+    showView("settings");
+    renderSettingsPlaceholder();
+  });
 }
 
 // =========================
-// GAME ACTIONS
+// GAME ACTION
 // =========================
-function handleOpenPack() {
+window.openPack = () => {
   const cards = openPack();
-
   state.coins += 10;
   saveState(state);
   updateCoins(state.coins);
+  console.log("Pack aberto:", cards);
+};
 
-  renderPackResult(cards);
+// =========================
+// SETTINGS (placeholder)
+// =========================
+function renderSettingsPlaceholder() {
+  const root = document.getElementById("view-settings");
+  if (!root) return;
+
+  root.innerHTML = `
+    <div class="card panel">
+      <h2>Configurações</h2>
+      <p class="muted">Em breve 😌</p>
+
+      <div class="spacer"></div>
+
+      <button class="btn ghost" id="btnBackHome">
+        Voltar
+      </button>
+    </div>
+  `;
+
+  document.getElementById("btnBackHome")?.addEventListener("click", () => {
+    showView("home");
+  });
 }
 
-// =========================
-// RENDER RESULTS
-// =========================
-function renderPackResult(cards) {
-  const log = document.getElementById("playLog");
-  const pack = document.getElementById("packResult");
-
-  const html = cards
-    .map(c => `${c.rank}${c.suitSymbol}`)
-    .join(" • ");
-
-  if (log) {
-    log.textContent = `Pack aberto: ${html}`;
-  }
-
-  if (pack) {
-    pack.innerHTML = cards
-      .map(
-        c => `
-        <div class="playCard">
-          <div class="rank">${c.rank}</div>
-          <div class="suit">${c.suitSymbol}</div>
-          <div class="val">${c.rarity}</div>
-        </div>
-      `
-      )
-      .join("");
-  }
-}
-
-// =========================
 document.addEventListener("DOMContentLoaded", init);
