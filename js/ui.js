@@ -1,142 +1,132 @@
-// =========================
-// STATUS / HUD
-// =========================
-export function setOnlineStatus() {
-  const dot = document.getElementById("onlineDot");
-  const label = document.getElementById("onlineLabel");
+// ui.js
 
-  if (!dot || !label) return;
+(function () {
+  // ===== util: ativa/desativa classe "is-active" =====
+  function setActive(items, idx) {
+    items.forEach((el, i) => el.classList.toggle("is-active", i === idx));
+  }
 
-  const online = navigator.onLine;
-  dot.style.background = online ? "#2ecc71" : "#e74c3c";
-  label.textContent = online ? "Online" : "Offline";
-}
+  function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, n));
+  }
 
-export function updateCoins(value) {
-  const el = document.getElementById("coinsLabel");
-  if (el) el.textContent = value;
-}
+  // ===== status online/offline (HUD) =====
+  function updateNetStatus() {
+    const dot = document.querySelector(".hud .dot");
+    const label = document.querySelector(".hud .label");
+    if (!dot || !label) return;
 
-// =========================
-// NAVEGAÇÃO ENTRE VIEWS
-// =========================
-export function showView(name) {
-  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
-  const view = document.getElementById(`view-${name}`);
-  if (view) view.classList.add("active");
-}
+    const online = navigator.onLine;
+    dot.classList.toggle("online", online);
+    dot.classList.toggle("offline", !online);
+    label.textContent = online ? "Online" : "Offline";
+  }
 
-// =========================
-// HOME (STEAM VIBE - ícone pequeno)
-// =========================
-export function renderHomeView() {
-  const root = document.getElementById("view-home");
-  if (!root) return;
+  // ===== navegação de menu (teclado + mouse) =====
+  function initMenu() {
+    const items = Array.from(document.querySelectorAll(".menu-item"));
+    if (!items.length) return;
 
-  root.innerHTML = `
-    <div class="home-hero">
-      <div class="home-content">
-        <div class="home-title">
-          <h1>UNPLED</h1>
-          <p>Deck • Gacha • Roguelike vibes</p>
-        </div>
+    let activeIndex = clamp(
+      items.findIndex((el) => el.classList.contains("is-active")),
+      0,
+      items.length - 1
+    );
 
-        <div class="home-menu">
-          <button class="menu-link menu-inline" id="btnGoPlay">
-            <img class="menu-ico" src="./assets/img/icon-play.png" alt="" />
-            <span>Jogar</span>
-          </button>
+    setActive(items, activeIndex);
 
-          <button class="menu-link menu-inline" id="btnGoCollection">
-            <img class="menu-ico" src="./assets/img/icon-collection.png" alt="" />
-            <span>Coleção</span>
-          </button>
+    // mouse hover também "seleciona"
+    items.forEach((el, idx) => {
+      el.addEventListener("mouseenter", () => {
+        activeIndex = idx;
+        setActive(items, activeIndex);
+      });
 
-          <button class="menu-link menu-inline" id="btnGoSettings">
-            <img class="menu-ico" src="./assets/img/icon-settings.png" alt="" />
-            <span>Configurações</span>
-          </button>
-        </div>
+      el.addEventListener("focus", () => {
+        activeIndex = idx;
+        setActive(items, activeIndex);
+      });
 
-        <div class="home-footerhint">
-          Pressione <strong>Jogar</strong> para começar
-        </div>
-      </div>
-    </div>
-  `;
-}
+      el.addEventListener("click", (e) => {
+        // se for <a>, deixa navegar normal.
+        // se for <button/div>, dispare pelo data-action.
+        const action = el.getAttribute("data-action");
+        if (action) {
+          e.preventDefault();
+          triggerAction(action);
+        }
+      });
+    });
 
-// =========================
-// PLAY
-// =========================
-export function renderPlayView() {
-  const root = document.getElementById("view-play");
-  if (!root) return;
+    // teclado: setas + enter
+    window.addEventListener("keydown", (e) => {
+      const key = e.key;
 
-  root.innerHTML = `
-    <div class="card panel">
-      <div class="row between">
-        <h2>Partida</h2>
-        <button class="btn ghost" id="btnBackFromPlay" style="width:auto; padding:10px 12px;">
-          Voltar
-        </button>
-      </div>
+      if (key === "ArrowUp" || key === "w" || key === "W") {
+        e.preventDefault();
+        activeIndex = (activeIndex - 1 + items.length) % items.length;
+        setActive(items, activeIndex);
+        items[activeIndex].focus?.();
+      }
 
-      <p class="muted">Abra packs e monte sua coleção</p>
+      if (key === "ArrowDown" || key === "s" || key === "S") {
+        e.preventDefault();
+        activeIndex = (activeIndex + 1) % items.length;
+        setActive(items, activeIndex);
+        items[activeIndex].focus?.();
+      }
 
-      <div class="divider"></div>
+      if (key === "Enter" || key === " ") {
+        const el = items[activeIndex];
+        if (!el) return;
 
-      <button class="btn primary" id="btnOpenPack">Abrir Pack</button>
+        const action = el.getAttribute("data-action");
+        if (action) {
+          e.preventDefault();
+          triggerAction(action);
+          return;
+        }
 
-      <div class="spacer"></div>
+        // se for link, navega
+        const href = el.getAttribute("href");
+        if (href) {
+          e.preventDefault();
+          window.location.href = href;
+        }
+      }
+    });
+  }
 
-      <div id="playLog" class="muted small"></div>
-    </div>
-  `;
-}
+  // ===== ações (ajusta aqui pro teu projeto) =====
+  function triggerAction(action) {
+    // Aqui você pluga no teu roteamento / páginas
+    // Só deixei um padrão bem simples:
+    switch (action) {
+      case "play":
+        // exemplo: ir pra tela do jogo
+        window.location.href = "games/money-clicker/index.html";
+        break;
 
-// =========================
-// COLEÇÃO
-// =========================
-export function renderCollectionView() {
-  const root = document.getElementById("view-collection");
-  if (!root) return;
+      case "collection":
+        window.location.href = "collection.html";
+        break;
 
-  root.innerHTML = `
-    <div class="card panel">
-      <div class="row between">
-        <h2>Coleção</h2>
-        <button class="btn ghost" id="btnBackFromCollection" style="width:auto; padding:10px 12px;">
-          Voltar
-        </button>
-      </div>
+      case "settings":
+        window.location.href = "settings.html";
+        break;
 
-      <p class="muted">Suas cartas desbloqueadas</p>
+      default:
+        console.log("[UNPLED] ação não mapeada:", action);
+        break;
+    }
+  }
 
-      <div class="divider"></div>
+  // ===== boot =====
+  document.addEventListener("DOMContentLoaded", () => {
+    updateNetStatus();
+    window.addEventListener("online", updateNetStatus);
+    window.addEventListener("offline", updateNetStatus);
 
-      <div id="collectionGrid" class="collection"></div>
-    </div>
-  `;
-}
-
-// =========================
-// SETTINGS
-// =========================
-export function renderSettingsView() {
-  const root = document.getElementById("view-settings");
-  if (!root) return;
-
-  root.innerHTML = `
-    <div class="card panel">
-      <div class="row between">
-        <h2>Configurações</h2>
-        <button class="btn ghost" id="btnBackFromSettings" style="width:auto; padding:10px 12px;">
-          Voltar
-        </button>
-      </div>
-
-      <p class="muted">Em breve 😌</p>
-    </div>
-  `;
-}
+    initMenu();
+  });
+})();
