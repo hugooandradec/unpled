@@ -1,0 +1,137 @@
+/* css/collection.css */
+
+.collection-wrap {
+  width: min(980px, 92vw);
+  margin: 24px auto 0;
+  text-align: center;
+}
+
+.collection-title {
+  margin: 0 0 10px;
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 18px;
+  opacity: 0.92;
+  text-shadow: 0 1px 14px rgba(0,0,0,0.6);
+}
+
+/* ===== Botões tipo de coleção ===== */
+.collection-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 10px 0 14px;
+}
+
+.pill-btn {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(15, 18, 30, 0.35);
+  color: rgba(255,255,255,0.88);
+  padding: 10px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  font-size: 11px;
+  box-shadow: 0 14px 34px rgba(0,0,0,0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 140ms ease, border-color 140ms ease, opacity 140ms ease;
+}
+
+.pill-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.pill-btn.active {
+  border-color: rgba(167, 139, 250, 0.55);
+  background: rgba(167, 139, 250, 0.18);
+}
+
+/* ===== Subheader (onde mostra “Base — 12 cartas”) ===== */
+.collection-sub {
+  margin: 0 0 14px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* ===== Filtro de naipe ===== */
+.suit-filter {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+}
+
+/* ===== Grid de cartas (placeholder) ===== */
+.cards-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.card-mini {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(12, 14, 22, 0.45);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, opacity 140ms ease;
+}
+
+.card-mini:hover {
+  transform: translateY(-2px);
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.card-mini .art {
+  height: 110px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.06);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  opacity: 0.9;
+}
+
+.card-mini .info {
+  padding: 10px 10px 12px;
+}
+
+.card-mini .name {
+  margin: 0;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+.card-mini .meta {
+  margin: 6px 0 0;
+  font-size: 11px;
+  opacity: 0.75;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* ===== Botão voltar ===== */
+.collection-back {
+  margin-top: 16px;
+}
+
+/* Responsivo */
+@media (max-width: 980px) {
+  .cards-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
