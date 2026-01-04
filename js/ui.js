@@ -1,6 +1,7 @@
 // ui.js
 (function () {
   const STORAGE_LAST_VIEW = "unpled:lastView";
+  const STORAGE_HAS_NAV = "unpled:hasNavigated";
 
   function setActive(items, idx) {
     items.forEach((el, i) => el.classList.toggle("is-active", i === idx));
@@ -27,23 +28,22 @@
   }
 
   function saveLastView(viewId) {
-    try {
-      localStorage.setItem(STORAGE_LAST_VIEW, viewId);
-    } catch {}
+    try { localStorage.setItem(STORAGE_LAST_VIEW, viewId); } catch {}
   }
-
   function getLastView() {
-    try {
-      return localStorage.getItem(STORAGE_LAST_VIEW);
-    } catch {
-      return null;
-    }
+    try { return localStorage.getItem(STORAGE_LAST_VIEW); } catch { return null; }
+  }
+  function setHasNavigated() {
+    try { localStorage.setItem(STORAGE_HAS_NAV, "1"); } catch {}
+  }
+  function hasNavigatedBefore() {
+    try { return localStorage.getItem(STORAGE_HAS_NAV) === "1"; } catch { return false; }
   }
 
   function ensureBackOverlay() {
     if (document.getElementById("unpledBackOverlay")) return;
 
-    // CSS mínimo (sem depender do global.css)
+    // CSS bem agressivo pra não ficar por baixo de nada
     const style = document.createElement("style");
     style.id = "unpledBackOverlayStyle";
     style.textContent = `
@@ -51,12 +51,16 @@
         position: fixed;
         left: 14px;
         top: 74px; /* abaixo da topbar */
-        z-index: 90;
+        z-index: 9999 !important;
         display: none;
+        pointer-events: auto !important;
+      }
+      #unpledBackOverlay *{
+        pointer-events: auto !important;
       }
       #unpledBackOverlay button{
         border: 1px solid rgba(255,255,255,0.18);
-        background: rgba(15,18,30,0.45);
+        background: rgba(15,18,30,0.55);
         color: rgba(255,255,255,0.92);
         padding: 12px 16px;
         border-radius: 999px;
@@ -67,7 +71,7 @@
         font-size: 12px;
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        box-shadow: 0 18px 40px rgba(0,0,0,0.35);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.45);
       }
       #unpledBackOverlay button:active{
         transform: translateY(1px);
@@ -80,7 +84,9 @@
     wrap.innerHTML = `<button type="button" id="unpledBackBtn">Voltar</button>`;
     document.body.appendChild(wrap);
 
-    wrap.querySelector("#unpledBackBtn").addEventListener("click", () => {
+    wrap.querySelector("#unpledBackBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       showView("view-home");
     });
   }
@@ -88,9 +94,8 @@
   function toggleBackOverlay(currentViewId) {
     const overlay = document.getElementById("unpledBackOverlay");
     if (!overlay) return;
-
-    // Só aparece fora da home
-    overlay.style.display = currentViewId && currentViewId !== "view-home" ? "block" : "none";
+    overlay.style.display =
+      currentViewId && currentViewId !== "view-home" ? "block" : "none";
   }
 
   function showView(viewId) {
@@ -100,14 +105,14 @@
     const target = document.getElementById(viewId);
     if (target) target.classList.add("active");
 
-    // salva a tela atual (pra refresh manter)
+    // salva a tela atual (pra refresh manter depois que você navegar)
     if (viewId) saveLastView(viewId);
 
     // botão voltar interno
     toggleBackOverlay(viewId);
 
     // scroll pro topo quando trocar de tela
-    const main = document.querySelector(".screen"); // <-- era ".main"
+    const main = document.querySelector(".screen");
     if (main) main.scrollTo({ top: 0, behavior: "auto" });
   }
 
@@ -179,6 +184,9 @@
   }
 
   function triggerAction(action) {
+    // a partir daqui, o usuário “navegou” pelo app
+    setHasNavigated();
+
     switch (action) {
       case "play":
         showView("view-play");
@@ -200,27 +208,28 @@
   }
 
   function restoreLastView() {
-    const last = getLastView();
+    // Se o usuário nunca navegou (ou veio com um lastView velho), começa SEMPRE na home
+    if (!hasNavigatedBefore()) {
+      showView("view-home");
+      return;
+    }
 
-    // Se não tiver last view, vai pra home e salva
+    const last = getLastView();
     if (!last) {
       showView("view-home");
       return;
     }
 
-    // Se existir e estiver no DOM, restaura
     const exists = document.getElementById(last);
     if (exists) {
       showView(last);
 
-      // Se for coleção, dispara o render
       if (last === "view-collection") {
         window.dispatchEvent(new CustomEvent("unpled:open-collection"));
       }
       return;
     }
 
-    // fallback
     showView("view-home");
   }
 
@@ -233,7 +242,6 @@
 
     initMenu();
 
-    // restaura a tela após refresh
     restoreLastView();
   });
 })();
