@@ -1,12 +1,16 @@
 /* css/collection.css */
 
-/* Faz a coleção “descer” mesmo se .view for flex/center no global */
-#view-collection{
-  display: flex !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
+/* IMPORTANTE:
+   NÃO force display no #view-collection, senão ele ignora .view{display:none}
+   e fica aparecendo em cima das outras telas.
+*/
+
+#view-collection.active{
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
   width: 100%;
-  padding-top: 78px;
+  padding-top: 20px;   /* ajuste fino do “descer” dentro da view */
   padding-bottom: 40px;
 }
 
