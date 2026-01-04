@@ -196,7 +196,7 @@ h2{ font-size: 20px; }
   background:
     radial-gradient(900px 420px at 50% 10%, rgba(124,77,255,.22), transparent 60%),
     linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.78)),
-    url("../assets/cards/bg-home.jpg") center/cover no-repeat;
+    url("../assets/img/bg-home.jpg") center/cover no-repeat;
   transform: scale(1.02);
   filter: saturate(1.05) contrast(1.05);
 }
