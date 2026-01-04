@@ -1,35 +1,99 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="theme-color" content="#14161a" />
   <title>UNPLED</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
 
-  <main class="screen">
+  <!-- (opcional) se não tiver manifest ainda, pode apagar -->
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- ✅ aqui estava errado (css/styles.css). Agora é na raiz -->
+  <link rel="stylesheet" href=".css/styles.css" />
+</head>
+
+<body>
+  <!-- CAMADAS DE FUNDO -->
+  <div class="bg-overlay"></div>
+
+  <!-- HUD / TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🃏</div>
+      <div>
+        <div class="title">UNPLED</div>
+        <div class="sub" id="statusText">Offline-ready</div>
+      </div>
+    </div>
+
+    <div class="wallet">
+      <div class="pill">
+        <span class="dot" id="onlineDot"></span>
+        <span id="onlineLabel">—</span>
+      </div>
+      <div class="pill">
+        <span>🪙</span>
+        <strong id="coinsLabel">0</strong>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main screen">
 
     <!-- HOME -->
     <section class="view active" id="view-home">
-      <h1 class="logo">UNPLED</h1>
+      <div class="hero">
+        <div class="logo">
+          <h1>UNPLED</h1>
+          <p>Deck • Gacha • Roguelike vibes</p>
+        </div>
 
-      <div class="menu">
-        <button class="menu-item" data-action="play">Jogar</button>
-        <button class="menu-item" data-action="collection">Coleção</button>
-        <button class="menu-item" data-action="settings">Configurações</button>
+        <div class="menu-wrap">
+          <ul class="menu">
+            <li>
+              <button class="menu-item is-active" data-action="play">
+                <span class="icon"><img src="assets/icons/play.png" alt="Jogar"></span>
+                <span class="text">Jogar</span>
+              </button>
+            </li>
+
+            <li>
+              <button class="menu-item" data-action="collection">
+                <span class="icon"><img src="assets/icons/collection.png" alt="Coleção"></span>
+                <span class="text">Coleção</span>
+              </button>
+            </li>
+
+            <li>
+              <button class="menu-item" data-action="settings">
+                <span class="icon"><img src="assets/icons/settings.png" alt="Configurações"></span>
+                <span class="text">Configurações</span>
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </section>
 
-    <!-- COLEÇÃO -->
+    <!-- GAME -->
+    <section class="view" id="view-play"></section>
+
+    <!-- COLLECTION -->
     <section class="view" id="view-collection"></section>
 
-    <!-- OUTRAS -->
-    <section class="view" id="view-play"></section>
+    <!-- SETTINGS -->
     <section class="view" id="view-settings"></section>
 
   </main>
 
-  <script src="ui.js"></script>
-  <script src="collection.js"></script>
+  <footer class="footer">
+    <span class="muted small">UNPLED • PWA • Offline-first</span>
+  </footer>
+
+  <!-- ✅ aqui estava errado (./js/...). Agora é na raiz -->
+  <script src=".js/ui.js"></script>
+  <script src=".js/collection.js"></script>
 </body>
 </html>
