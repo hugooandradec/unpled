@@ -1,242 +1,288 @@
-/* css/collection.css */
+// js/collection.js
+(function () {
+  const TYPES = ["Base", "Incomum", "Rara", "Épica", "Lendária"];
+  const SUITS = ["Todos", "Espadas", "Ouro", "Paus", "Copas"];
 
-/* Faz a Coleção começar do topo e “descer” mesmo que .view seja flex/center no global */
-#view-collection{
-  display: flex !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
+  // Persistência de view no refresh (vale pro app inteiro)
+  const STORAGE_LAST_VIEW = "unpled:lastView";
 
-  width: 100%;
-  padding-top: 78px;   /* <<< regula aqui o quanto “desce” */
-  padding-bottom: 40px;
-}
+  // Cartas Base - Espadas (A-4)
+  const CARDS = [
+    { id: "sp-a", nome: "Ás de Espadas", tipo: "Base", naipe: "Espadas", valor: "A", img: "assets/cards/base/espadas/A_espadas.png" },
+    { id: "sp-2", nome: "2 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "2", img: "assets/cards/base/espadas/2_espadas.png" },
+    { id: "sp-3", nome: "3 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "3", img: "assets/cards/base/espadas/3_espadas.png" },
+    { id: "sp-4", nome: "4 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "4", img: "assets/cards/base/espadas/4_espadas.png" }
+  ];
 
-.collection-wrap{
-  width: min(980px, 92vw);
-  margin: 0 auto;
-  text-align: center;
-}
+  const state = {
+    selectedType: "Base",
+    selectedSuit: "Todos",
+  };
 
-/* Topo: botão voltar + título */
-.collection-top{
-  position: relative;
-  margin-bottom: 14px;
-}
+  function qs(sel) { return document.querySelector(sel); }
+  function el(tag, cls) {
+    const e = document.createElement(tag);
+    if (cls) e.className = cls;
+    return e;
+  }
 
-.collection-back-btn{
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
+  // ====== View persistence (sem travar na coleção) ======
+  function setLastView(viewId) {
+    try { localStorage.setItem(STORAGE_LAST_VIEW, viewId); } catch {}
+  }
+  function getLastView() {
+    try { return localStorage.getItem(STORAGE_LAST_VIEW); } catch { return null; }
+  }
 
-/* Título */
-.collection-title{
-  margin: 0;
-  font-weight: 900;
-  letter-spacing: .32em;
-  text-transform: uppercase;
-  font-size: 44px;
-  opacity: .96;
-  text-shadow: 0 2px 22px rgba(0,0,0,.70);
-}
+  // embrulha UNPLED.showView pra salvar a view SEM precisar mexer no ui.js
+  function patchShowViewPersistence() {
+    const w = window;
+    if (!w.UNPLED || typeof w.UNPLED.showView !== "function") return;
 
-/* Tipos */
-.collection-types{
-  display:flex;
-  flex-wrap:wrap;
-  gap:12px;
-  justify-content:center;
-  margin: 18px 0 18px;
-}
+    // evita patch duplicado
+    if (w.UNPLED.__patched_lastView) return;
 
-/* Subtexto */
-.collection-sub{
-  margin:0 0 16px;
-  font-size:16px;
-  font-weight:800;
-  opacity:.85;
-}
+    const original = w.UNPLED.showView;
+    w.UNPLED.showView = function (viewId) {
+      setLastView(viewId);
+      return original.call(this, viewId);
+    };
 
-/* Filtro naipe */
-.suit-filter{
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  flex-wrap:wrap;
-  margin:0 0 26px;
-}
+    w.UNPLED.__patched_lastView = true;
+  }
 
-/* Pills */
-.pill-btn{
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(15,18,30,.35);
-  color:rgba(255,255,255,.90);
-  padding:10px 13px;
-  border-radius:999px;
-  cursor:pointer;
-  user-select:none;
+  function restoreLastViewOnce() {
+    // Só restaura se for um id válido e existir no DOM
+    const last = getLastView();
+    if (!last) return;
 
-  font-weight:900;
-  letter-spacing:.10em;
-  text-transform:uppercase;
-  font-size:11px;
+    const elView = document.getElementById(last);
+    if (!elView) return;
 
-  box-shadow:0 14px 34px rgba(0,0,0,.25);
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
+    // Se já tem alguma view ativa (ex.: view-home), não força nada
+    const active = document.querySelector(".view.active");
+    if (active && active.id) return;
 
-  transition:transform 140ms ease, border-color 140ms ease, opacity 140ms ease;
-}
-.pill-btn.small{ padding:8px 11px; font-size:10px; }
-.pill-btn:hover{ transform:translateY(-1px); border-color:rgba(167,139,250,.38); }
-.pill-btn.active{ border-color:rgba(167,139,250,.62); background:rgba(167,139,250,.20); }
+    if (window.UNPLED && typeof window.UNPLED.showView === "function") {
+      window.UNPLED.showView(last);
+    }
+  }
 
-/* GRID 4 colunas */
-.cards-grid{
-  display:grid;
-  gap:18px;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  align-items:start;
-  justify-items:stretch;
-}
+  // ====== UI mount ======
+  function mount() {
+    const root = qs("#view-collection");
+    if (!root) return;
+    if (qs("#collectionTypes")) return; // já montado
 
-/* Card */
-.card-mini{
-  position: relative;
-  border-radius:18px;
-  overflow:hidden;
-  background:rgba(12,14,22,.40);
-  box-shadow:0 18px 40px rgba(0,0,0,.35);
-  cursor:pointer;
-  transition:transform 140ms ease, filter 140ms ease;
-}
-.card-mini:hover{
-  transform:translateY(-2px);
-  filter:brightness(1.05);
-}
+    root.innerHTML = `
+      <div class="collection-wrap">
+        <div class="collection-top">
+          <button class="pill-btn small collection-back-btn" id="btnCollectionBack" type="button">Voltar</button>
+          <h2 class="collection-title">Coleção</h2>
+        </div>
 
-/* Arte (carta em pé 3/4) */
-.card-mini .art{
-  width:100%;
-  aspect-ratio: 3 / 4;
-  background:rgba(255,255,255,.06);
-  display:grid;
-  place-items:center;
-  padding:10px;
-}
-.card-mini .art img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-}
+        <div class="collection-types" id="collectionTypes"></div>
+        <p class="collection-sub" id="collectionSub"></p>
+        <div class="suit-filter" id="suitFilter"></div>
+        <div class="cards-grid" id="cardsGrid"></div>
+      </div>
 
-/* Esconde meta */
-.card-mini .info{ display:none; }
+      <div class="card-modal" id="cardModal" aria-hidden="true">
+        <button class="card-modal-close" id="cardModalClose" type="button">Fechar</button>
+        <div class="card-modal-inner" id="cardModalInner">
+          <figure class="card-modal-figure">
+            <img id="cardModalImg" alt="Carta" />
+          </figure>
+        </div>
+      </div>
+    `;
 
-/* Borda somente para cartas Base */
-.card-mini[data-tipo="Base"]::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:18px;
-  pointer-events:none;
+    renderTypes();
+    renderSuits();
+    bindEvents();
+    render();
+  }
 
-  border:2px solid rgba(255,255,255,0.22);
-  box-shadow:
-    inset 0 0 0 2px rgba(0,0,0,0.25),
-    inset 0 0 30px rgba(255,255,255,0.06);
-}
-.card-mini[data-tipo="Base"]::after{
-  content:"";
-  position:absolute;
-  inset:-1px;
-  border-radius:18px;
-  pointer-events:none;
-  background: radial-gradient(circle at 50% 10%, rgba(167,139,250,0.20), transparent 55%);
-  opacity:0.9;
-}
+  function bindEvents() {
+    // tipos
+    qs("#collectionTypes").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-type]");
+      if (!btn) return;
+      state.selectedType = btn.dataset.type;
+      state.selectedSuit = "Todos";
+      render();
+    });
 
-/* vazio */
-.collection-empty{
-  grid-column:1 / -1;
-  padding:20px 0;
-  opacity:.88;
-  font-size:16px;
-  font-weight:800;
-}
+    // naipes
+    qs("#suitFilter").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-suit]");
+      if (!btn) return;
+      state.selectedSuit = btn.dataset.suit;
+      render();
+    });
 
-/* MODAL */
-.card-modal{
-  position:fixed;
-  inset:0;
-  z-index:80;
-  display:none;
-  background:rgba(0,0,0,.78);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-.card-modal.show{ display:block; }
+    // click carta -> modal
+    qs("#cardsGrid").addEventListener("click", (e) => {
+      const card = e.target.closest(".card-mini");
+      if (!card) return;
+      openModal(card.dataset.id);
+    });
 
-.card-modal-inner{
-  position:absolute;
-  inset:0;
-  display:grid;
-  place-items:center;
-  padding:22px;
-}
+    // voltar para HOME (sem seta do navegador)
+    qs("#btnCollectionBack").addEventListener("click", () => {
+      // fecha modal se estiver aberto
+      closeModal();
 
-.card-modal-close{
-  position:fixed;
-  top:74px;
-  right:18px;
+      if (window.UNPLED && typeof window.UNPLED.showView === "function") {
+        window.UNPLED.showView("view-home");
+      }
+    });
 
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(15,18,30,.45);
-  color:rgba(255,255,255,.92);
+    // modal fechar
+    qs("#cardModalClose").addEventListener("click", closeModal);
 
-  padding:13px 20px;
-  border-radius:999px;
-  cursor:pointer;
+    // clicar fora fecha
+    qs("#cardModalInner").addEventListener("click", (e) => {
+      if (e.target && e.target.id === "cardModalInner") closeModal();
+    });
 
-  font-weight:900;
-  letter-spacing:.12em;
-  text-transform:uppercase;
-  font-size:12px;
-}
+    // ESC fecha
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+  }
 
-.card-modal-figure{
-  display:grid;
-  place-items:center;
+  function renderTypes() {
+    const wrap = qs("#collectionTypes");
+    wrap.innerHTML = "";
+    TYPES.forEach((t) => {
+      const b = el("button", "pill-btn");
+      b.textContent = t;
+      b.dataset.type = t;
+      wrap.appendChild(b);
+    });
+  }
 
-  max-width:min(92vw, 760px);
-  max-height:calc(100vh - 150px);
+  function renderSuits() {
+    const wrap = qs("#suitFilter");
+    wrap.innerHTML = "";
+    SUITS.forEach((s) => {
+      const b = el("button", "pill-btn small");
+      b.textContent = s;
+      b.dataset.suit = s;
+      wrap.appendChild(b);
+    });
+  }
 
-  padding:14px;
-  border-radius:18px;
+  function highlight(selector, key, value) {
+    document.querySelectorAll(selector).forEach((b) => {
+      const v = key === "type" ? b.dataset.type : b.dataset.suit;
+      b.classList.toggle("active", v === value);
+    });
+  }
 
-  border:1px solid rgba(255,255,255,.14);
-  background:rgba(12,14,22,.55);
-  box-shadow:0 28px 90px rgba(0,0,0,.65);
+  function render() {
+    highlight("#collectionTypes .pill-btn", "type", state.selectedType);
+    highlight("#suitFilter .pill-btn", "suit", state.selectedSuit);
 
-  overflow:visible;
-}
+    const cardsInType = CARDS.filter(c => c.tipo === state.selectedType);
+    const shown = cardsInType.filter(c => {
+      if (state.selectedSuit === "Todos") return true;
+      return c.naipe === state.selectedSuit;
+    });
 
-.card-modal-figure img{
-  max-width:100%;
-  max-height:calc(100vh - 190px);
-  width:auto;
-  height:auto;
-  object-fit:contain;
-  display:block;
-}
+    qs("#collectionSub").textContent = `${state.selectedType} — ${shown.length} carta(s)`;
+    renderCards(shown);
+  }
 
-@media (max-width: 900px){
-  .cards-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .collection-title{ font-size: 34px; }
-}
+  function renderCards(cards) {
+    const grid = qs("#cardsGrid");
+    grid.innerHTML = "";
 
-@media (max-width: 520px){
-  .collection-title{ font-size: 28px; letter-spacing: .24em; }
-}
+    if (!cards.length) {
+      const empty = el("div", "collection-empty");
+      empty.textContent = "Nenhuma carta encontrada nesse filtro.";
+      grid.appendChild(empty);
+      return;
+    }
+
+    cards.forEach((c) => {
+      const card = el("div", "card-mini");
+      card.dataset.id = c.id;
+      card.dataset.tipo = c.tipo; // <<< borda Base via CSS
+
+      const art = el("div", "art");
+      const img = document.createElement("img");
+      img.src = c.img || "";
+      img.alt = c.nome;
+
+      img.onerror = () => {
+        img.remove();
+        art.textContent = "★";
+      };
+
+      art.appendChild(img);
+      card.appendChild(art);
+
+      const info = el("div", "info");
+      card.appendChild(info);
+
+      grid.appendChild(card);
+    });
+  }
+
+  function openModal(cardId) {
+    const c = CARDS.find(x => x.id === cardId);
+    if (!c) return;
+
+    const modal = qs("#cardModal");
+    const img = qs("#cardModalImg");
+
+    img.src = c.img || "";
+    img.alt = c.nome;
+
+    img.onerror = () => {
+      img.removeAttribute("src");
+    };
+
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    const modal = qs("#cardModal");
+    if (!modal) return;
+
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
+  }
+
+  // Evento disparado pelo ui.js quando clica em Coleção
+  function openCollection() {
+    mount();
+    render();
+
+    // marca view atual (persistência)
+    setLastView("view-collection");
+  }
+
+  window.addEventListener("unpled:open-collection", openCollection);
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // garante que o patch do showView exista cedo
+    patchShowViewPersistence();
+
+    // monta a view (sem forçar ela ativa)
+    mount();
+
+    // tenta restaurar a última view APENAS se nenhuma estiver ativa
+    restoreLastViewOnce();
+  });
+
+})();
