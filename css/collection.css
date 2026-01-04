@@ -1,12 +1,16 @@
 /* css/collection.css */
 
+/* Desce a tela da coleção como um bloco (não só o conteúdo) */
+#view-collection {
+  width: 100%;
+  padding-top: 46px; /* aumenta/diminui aqui até ficar perfeito */
+}
+
 .collection-wrap {
   width: min(980px, 92vw);
   margin: 0 auto;
   text-align: center;
-
-  /* >>> ISSO é o que “desce” a tela de verdade <<< */
-  padding-top: 34px;
+  padding-top: 0px;
 }
 
 /* Título maior e com bastante respiro */
