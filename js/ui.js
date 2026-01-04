@@ -42,7 +42,10 @@ export function renderHomeView() {
         </div>
 
         <div class="home-menu">
-          <button class="menu-link" id="btnGoPlay">Jogar</button>
+          <button class="menu-link menu-with-icon" id="btnGoPlay">
+  <img src="./assets/img/icon-play.png" alt="Jogar" />
+  <span>Jogar</span>
+</button>
           <button class="menu-link" id="btnGoCollection">Coleção</button>
           <button class="menu-link" id="btnGoSettings">Configurações</button>
         </div>
