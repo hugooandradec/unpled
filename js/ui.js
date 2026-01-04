@@ -27,7 +27,7 @@ export function showView(name) {
 }
 
 // =========================
-// HOME (STEAM VIBE)
+// HOME (STEAM VIBE - ícone pequeno)
 // =========================
 export function renderHomeView() {
   const root = document.getElementById("view-home");
@@ -42,12 +42,20 @@ export function renderHomeView() {
         </div>
 
         <div class="home-menu">
-          <button class="menu-link menu-with-icon" id="btnGoPlay">
-  <img src="./assets/img/icon-play.png" alt="Jogar" />
-  <span>Jogar</span>
-</button>
-          <button class="menu-link" id="btnGoCollection">Coleção</button>
-          <button class="menu-link" id="btnGoSettings">Configurações</button>
+          <button class="menu-link menu-inline" id="btnGoPlay">
+            <img class="menu-ico" src="./assets/img/icon-play.png" alt="" />
+            <span>Jogar</span>
+          </button>
+
+          <button class="menu-link menu-inline" id="btnGoCollection">
+            <img class="menu-ico" src="./assets/img/icon-collection.png" alt="" />
+            <span>Coleção</span>
+          </button>
+
+          <button class="menu-link menu-inline" id="btnGoSettings">
+            <img class="menu-ico" src="./assets/img/icon-settings.png" alt="" />
+            <span>Configurações</span>
+          </button>
         </div>
 
         <div class="home-footerhint">
