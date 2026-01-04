@@ -90,6 +90,8 @@ body {
   opacity: 0.95;
 }
 
+.bg-overlay { pointer-events: none; }
+
 .dot {
   width: 8px;
   height: 8px;
