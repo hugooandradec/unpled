@@ -1,17 +1,20 @@
 // js/collection.js
 // Coleção com:
-// - título grande central
-// - tipos sempre visíveis
-// - grid 4 colunas
-// - cartas mini
-// - clique -> modal fullscreen
+// - Tipos sempre visíveis
+// - Grid 4 colunas
+// - Cartas Base (Espadas A-4) com borda Base
+// - Clique -> modal fullscreen
+// - Botão "Voltar" interno (não depende do navegador)
+// - Persistência da última view no refresh (localStorage)
+// - pushState/popstate quando possível
 
 (function () {
   const TYPES = ["Base", "Incomum", "Rara", "Épica", "Lendária"];
   const SUITS = ["Todos", "Espadas", "Ouro", "Paus", "Copas"];
 
-  // Por enquanto: Espadas (Ás - 4) na Base
-  // Ajuste os paths das imagens conforme seu projeto
+  const STORAGE_LAST_VIEW = "unpled:lastView";
+
+  // Cartas Base - Espadas (A-4)
   const CARDS = [
     { id: "sp-a", nome: "Ás de Espadas", tipo: "Base", naipe: "Espadas", valor: "A", img: "assets/cards/base/espadas/A_espadas.png" },
     { id: "sp-2", nome: "2 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "2", img: "assets/cards/base/espadas/2_espadas.png" },
@@ -31,6 +34,44 @@
     return e;
   }
 
+  // ===== helpers: navegação/persistência =====
+  function showViewSafe(viewId) {
+    // usa a função do seu ui.js, se existir
+    if (window.UNPLED && typeof window.UNPLED.showView === "function") {
+      window.UNPLED.showView(viewId);
+      return true;
+    }
+    return false;
+  }
+
+  function rememberView(viewId) {
+    try { localStorage.setItem(STORAGE_LAST_VIEW, viewId); } catch {}
+  }
+
+  function pushViewState(viewId) {
+    // evita lotar history com o mesmo estado
+    try {
+      const cur = history.state && history.state.view;
+      if (cur !== viewId) history.pushState({ view: viewId }, "", "");
+    } catch {}
+  }
+
+  function restoreLastView() {
+    // Tenta restaurar a última view após refresh
+    let last = null;
+    try { last = localStorage.getItem(STORAGE_LAST_VIEW); } catch {}
+    if (!last) return;
+
+    // Espera UNPLED estar pronto (ui.js)
+    const start = Date.now();
+    (function tick() {
+      if (showViewSafe(last)) return;
+      if (Date.now() - start > 1200) return; // para não ficar infinito
+      requestAnimationFrame(tick);
+    })();
+  }
+
+  // ===== montagem =====
   function mount() {
     const root = qs("#view-collection");
     if (!root) return;
@@ -38,18 +79,17 @@
 
     root.innerHTML = `
       <div class="collection-wrap">
-        <h2 class="collection-title">Coleção</h2>
+        <div class="collection-top">
+          <button class="pill-btn small collection-back-btn" id="btnCollectionBackHome" type="button">Voltar</button>
+          <h2 class="collection-title">Coleção</h2>
+        </div>
 
         <div class="collection-types" id="collectionTypes"></div>
-
         <p class="collection-sub" id="collectionSub"></p>
-
         <div class="suit-filter" id="suitFilter"></div>
-
         <div class="cards-grid" id="cardsGrid"></div>
       </div>
 
-      <!-- Modal fullscreen -->
       <div class="card-modal" id="cardModal" aria-hidden="true">
         <button class="card-modal-close" id="cardModalClose" type="button">Fechar</button>
         <div class="card-modal-inner" id="cardModalInner">
@@ -63,7 +103,7 @@
     renderTypes();
     renderSuits();
     bindEvents();
-    render(); // já abre mostrando Base + Todos
+    render();
   }
 
   function bindEvents() {
@@ -88,6 +128,13 @@
       openModal(card.dataset.id);
     });
 
+    // Botão voltar interno (evita seta do navegador fechar PWA)
+    qs("#btnCollectionBackHome").addEventListener("click", () => {
+      rememberView("view-home");
+      pushViewState("view-home");
+      showViewSafe("view-home");
+    });
+
     // Modal
     const modal = qs("#cardModal");
     qs("#cardModalClose").addEventListener("click", closeModal);
@@ -102,8 +149,17 @@
       if (e.key === "Escape") closeModal();
     });
 
-    // impedir scroll do body quando modal abre
-    modal.addEventListener("transitionend", () => {});
+    // back/forward do browser (quando não fecha o app)
+    window.addEventListener("popstate", (e) => {
+      const view = e.state && e.state.view;
+      if (view) {
+        rememberView(view);
+        showViewSafe(view);
+      }
+    });
+
+    // fallback: se o modal estiver aberto e o usuário "voltar", fecha modal primeiro
+    modal.addEventListener("click", () => {});
   }
 
   function renderTypes() {
@@ -128,6 +184,13 @@
     });
   }
 
+  function highlight(selector, dataKey, value) {
+    document.querySelectorAll(selector).forEach((b) => {
+      const key = dataKey === "type" ? b.dataset.type : b.dataset.suit;
+      b.classList.toggle("active", key === value);
+    });
+  }
+
   function render() {
     highlight("#collectionTypes .pill-btn", "type", state.selectedType);
     highlight("#suitFilter .pill-btn", "suit", state.selectedSuit);
@@ -139,15 +202,7 @@
     });
 
     qs("#collectionSub").textContent = `${state.selectedType} — ${shown.length} carta(s)`;
-
     renderCards(shown);
-  }
-
-  function highlight(selector, dataKey, value) {
-    document.querySelectorAll(selector).forEach((b) => {
-      const key = dataKey === "type" ? b.dataset.type : b.dataset.suit;
-      b.classList.toggle("active", key === value);
-    });
   }
 
   function renderCards(cards) {
@@ -164,27 +219,24 @@
     cards.forEach((c) => {
       const card = el("div", "card-mini");
       card.dataset.id = c.id;
+      card.dataset.tipo = c.tipo; // <<< habilita borda por tipo (Base)
 
       const art = el("div", "art");
       const img = document.createElement("img");
       img.src = c.img || "";
       img.alt = c.nome;
+
+      // fallback se imagem quebrar
+      img.onerror = () => {
+        img.remove();
+        art.textContent = "★";
+      };
+
       art.appendChild(img);
-
-      const info = el("div", "info");
-      const name = el("p", "name");
-      name.textContent = c.nome;
-
-      const meta = el("div", "meta");
-      meta.innerHTML = `
-        <span>${c.naipe ?? "Sem naipe"}</span>
-        <span>${c.valor ?? ""}</span>
-      `;
-
-      info.appendChild(name);
-      info.appendChild(meta);
-
       card.appendChild(art);
+
+      // Mantém estrutura pra futuro (mas escondida no CSS)
+      const info = el("div", "info");
       card.appendChild(info);
 
       grid.appendChild(card);
@@ -201,8 +253,15 @@
     img.src = c.img || "";
     img.alt = c.nome;
 
+    img.onerror = () => {
+      img.removeAttribute("src");
+    };
+
     modal.classList.add("show");
     modal.setAttribute("aria-hidden", "false");
+
+    // trava scroll
+    document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
   }
 
@@ -212,20 +271,35 @@
 
     modal.classList.remove("show");
     modal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "hidden"; // seu body já é hidden; mantém consistente
+
+    // destrava scroll
+    document.documentElement.style.overflow = "";
+    document.body.style.overflow = "";
   }
 
-  // Integração com seu ui.js (evento que você já usa)
+  // Integração com ui.js (evento que você já usa)
   function openCollection() {
     mount();
-    render(); // garante base/todos renderizado
+    render();
+    rememberView("view-collection");
+    pushViewState("view-collection");
   }
 
   window.addEventListener("unpled:open-collection", openCollection);
 
-  // fallback
+  // Inicialização
   document.addEventListener("DOMContentLoaded", () => {
     mount();
+
+    // Restaura view após refresh (se estava em coleção, volta pra ela)
+    restoreLastView();
+
+    // Se não tiver estado no history, define home como base
+    try {
+      if (!history.state || !history.state.view) {
+        history.replaceState({ view: "view-home" }, "", "");
+      }
+    } catch {}
   });
 
 })();
