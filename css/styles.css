@@ -128,8 +128,10 @@ body {
 }
 
 .menu-wrap {
-  margin-top: 48px; /* empurra os botões para baixo */
+  width: min(420px, 92vw);
+  margin: 64px auto 0;  /* <-- aqui desce o bloco (top) */
 }
+
 
 /* ===== LOGO ===== */
 .logo {
