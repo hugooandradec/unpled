@@ -1,202 +1,147 @@
-// js/collection.js
-(function () {
-  const TYPES = ["Base", "Incomum", "Rara", "Épica", "Lendária"];
-  const SUITS = ["Todos", "Espadas", "Ouro", "Paus", "Copas"];
+// js/collection.js (ES Module)
 
-  const CARDS = [
-    { id: "sp-a", nome: "Ás de Espadas", tipo: "Base", naipe: "Espadas", valor: "A", img: "assets/cards/base/espadas/A_espadas.png" },
-    { id: "sp-2", nome: "2 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "2", img: "assets/cards/base/espadas/2_espadas.png" },
-    { id: "sp-3", nome: "3 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "3", img: "assets/cards/base/espadas/3_espadas.png" },
-    { id: "sp-4", nome: "4 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "4", img: "assets/cards/base/espadas/4_espadas.png" }
-  ];
+const TYPES = ["Base", "Incomum", "Rara", "Épica", "Lendária"];
+const SUITS = ["Todos", "Espadas", "Ouro", "Paus", "Copas"];
 
-  let state = { selectedType: "Base", selectedSuit: "Todos" };
+const CARDS = [
+  { id: "sp-a", nome: "Ás de Espadas", tipo: "Base", naipe: "Espadas", valor: "A", img: "assets/cards/base/espadas/A_espadas.png" },
+  { id: "sp-2", nome: "2 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "2", img: "assets/cards/base/espadas/2_espadas.png" },
+  { id: "sp-3", nome: "3 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "3", img: "assets/cards/base/espadas/3_espadas.png" },
+  { id: "sp-4", nome: "4 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "4", img: "assets/cards/base/espadas/4_espadas.png" }
+];
 
-  function qs(sel) { return document.querySelector(sel); }
-  function el(tag, cls) { const e = document.createElement(tag); if (cls) e.className = cls; return e; }
+let state = { type: "Base", suit: "Todos" };
 
-  function mount() {
-    const root = qs("#view-collection");
-    if (!root) return;
-    if (qs("#collectionTypes")) return;
+function qs(sel) { return document.querySelector(sel); }
 
-    root.innerHTML = `
-      <div class="collection-wrap">
-        <div class="collection-top">
-          <button class="pill-btn small collection-back-btn" id="btnCollectionBack" type="button">Voltar</button>
-          <h2 class="collection-title">Coleção</h2>
-        </div>
+function filterCards() {
+  return CARDS.filter(c => {
+    if (c.tipo !== state.type) return false;
+    if (state.suit === "Todos") return true;
+    return (c.naipe || "") === state.suit;
+  });
+}
 
-        <div class="collection-types" id="collectionTypes"></div>
-        <p class="collection-sub" id="collectionSub"></p>
-        <div class="suit-filter" id="suitFilter"></div>
-        <div class="cards-grid" id="cardsGrid"></div>
-      </div>
-
-      <div class="card-modal" id="cardModal" aria-hidden="true">
-        <button class="card-modal-close" id="cardModalClose" type="button">Fechar</button>
-        <div class="card-modal-inner" id="cardModalInner">
-          <figure class="card-modal-figure">
-            <img id="cardModalImg" alt="Carta" />
-          </figure>
-        </div>
+function openCardModal(card) {
+  let modal = qs("#cardModal");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "cardModal";
+    modal.innerHTML = `
+      <div class="card-modal-backdrop"></div>
+      <div class="card-modal-box">
+        <button class="card-modal-close" type="button">Fechar</button>
+        <img class="card-modal-img" alt="" />
       </div>
     `;
+    document.body.appendChild(modal);
 
-    renderTypes();
-    renderSuits();
-    bindEvents();
-    render();
-  }
-
-  function bindEvents() {
-    qs("#collectionTypes").addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-type]");
-      if (!btn) return;
-      state.selectedType = btn.dataset.type;
-      state.selectedSuit = "Todos";
-      render();
-    });
-
-    qs("#suitFilter").addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-suit]");
-      if (!btn) return;
-      state.selectedSuit = btn.dataset.suit;
-      render();
-    });
-
-    qs("#cardsGrid").addEventListener("click", (e) => {
-      const card = e.target.closest(".card-mini");
-      if (!card) return;
-      openModal(card.dataset.id);
-    });
-
-    qs("#btnCollectionBack").addEventListener("click", (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeModal();
-      window.UNPLED?.showView?.("view-home");
-    });
-
-    qs("#cardModalClose").addEventListener("click", closeModal);
-
-    qs("#cardModalInner").addEventListener("click", (e) => {
-      if (e.target && e.target.id === "cardModalInner") closeModal();
-    });
+    modal.querySelector(".card-modal-backdrop").addEventListener("click", closeCardModal);
+    modal.querySelector(".card-modal-close").addEventListener("click", closeCardModal);
 
     window.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeModal();
+      if (e.key === "Escape") closeCardModal();
     });
   }
 
-  function renderTypes() {
-    const wrap = qs("#collectionTypes");
-    wrap.innerHTML = "";
-    TYPES.forEach((t) => {
-      const b = el("button", "pill-btn");
-      b.textContent = t;
-      b.dataset.type = t;
-      wrap.appendChild(b);
+  const img = modal.querySelector(".card-modal-img");
+  img.src = card.img;
+  img.alt = card.nome;
+
+  modal.classList.add("open");
+}
+
+function closeCardModal() {
+  const modal = qs("#cardModal");
+  if (modal) modal.classList.remove("open");
+}
+
+function render() {
+  const root = qs("#view-collection");
+  if (!root) return;
+
+  root.innerHTML = `
+    <div class="collection-wrap">
+      <h1 class="collection-title">COLEÇÃO</h1>
+
+      <div class="collection-types" id="collectionTypes"></div>
+
+      <div class="collection-sub" id="collectionSub"></div>
+
+      <div class="suit-filter" id="suitFilter"></div>
+
+      <div class="cards-grid" id="cardsGrid"></div>
+
+      <div class="empty-text" id="emptyText" style="display:none;"></div>
+    </div>
+  `;
+
+  // tipos
+  const typesEl = qs("#collectionTypes");
+  TYPES.forEach(t => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "pill-btn" + (t === state.type ? " active" : "");
+    b.textContent = t.toUpperCase();
+    b.addEventListener("click", () => {
+      state.type = t;
+      state.suit = "Todos";
+      render();
     });
-  }
-
-  function renderSuits() {
-    const wrap = qs("#suitFilter");
-    wrap.innerHTML = "";
-    SUITS.forEach((s) => {
-      const b = el("button", "pill-btn small");
-      b.textContent = s;
-      b.dataset.suit = s;
-      wrap.appendChild(b);
-    });
-  }
-
-  function highlight(selector, key, value) {
-    document.querySelectorAll(selector).forEach((b) => {
-      const v = key === "type" ? b.dataset.type : b.dataset.suit;
-      b.classList.toggle("active", v === value);
-    });
-  }
-
-  function render() {
-    highlight("#collectionTypes .pill-btn", "type", state.selectedType);
-    highlight("#suitFilter .pill-btn", "suit", state.selectedSuit);
-
-    const cardsInType = CARDS.filter(c => c.tipo === state.selectedType);
-    const shown = cardsInType.filter(c => state.selectedSuit === "Todos" ? true : c.naipe === state.selectedSuit);
-
-    qs("#collectionSub").textContent = `${state.selectedType} — ${shown.length} carta(s)`;
-    renderCards(shown);
-  }
-
-  function renderCards(cards) {
-    const grid = qs("#cardsGrid");
-    grid.innerHTML = "";
-
-    if (!cards.length) {
-      const empty = el("div", "collection-empty");
-      empty.textContent = "Nenhuma carta encontrada nesse filtro.";
-      grid.appendChild(empty);
-      return;
-    }
-
-    cards.forEach((c) => {
-      const card = el("div", "card-mini");
-      card.dataset.id = c.id;
-      card.dataset.tipo = c.tipo;
-
-      const art = el("div", "art");
-      const img = document.createElement("img");
-      img.src = c.img || "";
-      img.alt = c.nome;
-
-      img.onerror = () => {
-        img.remove();
-        art.textContent = "★";
-      };
-
-      art.appendChild(img);
-      card.appendChild(art);
-
-      card.appendChild(el("div", "info"));
-      grid.appendChild(card);
-    });
-  }
-
-  function openModal(cardId) {
-    const c = CARDS.find(x => x.id === cardId);
-    if (!c) return;
-
-    const modal = qs("#cardModal");
-    const img = qs("#cardModalImg");
-
-    img.src = c.img || "";
-    img.alt = c.nome;
-
-    modal.classList.add("show");
-    modal.setAttribute("aria-hidden", "false");
-
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeModal() {
-    const modal = qs("#cardModal");
-    if (!modal) return;
-
-    modal.classList.remove("show");
-    modal.setAttribute("aria-hidden", "true");
-
-    document.documentElement.style.overflow = "";
-    document.body.style.overflow = "";
-  }
-
-  window.addEventListener("unpled:open-collection", () => {
-    mount();
-    render();
+    typesEl.appendChild(b);
   });
 
-  document.addEventListener("DOMContentLoaded", () => {
-    mount();
+  // suits
+  const suitEl = qs("#suitFilter");
+  SUITS.forEach(s => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "pill-btn" + (s === state.suit ? " active" : "");
+    b.textContent = s.toUpperCase();
+    b.addEventListener("click", () => {
+      state.suit = s;
+      render();
+    });
+    suitEl.appendChild(b);
   });
-})();
+
+  // cards
+  const list = filterCards();
+  qs("#collectionSub").textContent = `${state.type} — ${list.length} carta(s)`;
+
+  const grid = qs("#cardsGrid");
+  const empty = qs("#emptyText");
+
+  if (!list.length) {
+    empty.style.display = "block";
+    empty.textContent = "Nenhuma carta encontrada nesse filtro.";
+    return;
+  }
+
+  empty.style.display = "none";
+
+  list.forEach(card => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "card-thumb rarity-base";
+    btn.title = card.nome;
+
+    btn.innerHTML = `
+      <img class="card-thumb-img" src="${card.img}" alt="${card.nome}">
+    `;
+
+    btn.addEventListener("click", () => openCardModal(card));
+    grid.appendChild(btn);
+  });
+}
+
+// export chamado pelo ui.js
+export function renderCollectionView() {
+  render();
+}
+
+// quando a home manda o evento
+window.addEventListener("unpled:open-collection", () => {
+  // garante re-render se quiser
+  render();
+});
