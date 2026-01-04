@@ -1,27 +1,32 @@
 // js/collection.js
-// Coleção: escolha tipo (Base/Rara/etc) -> mostra grid + filtro opcional de naipe
+// Coleção: 1) escolhe tipo (Base/Rara/etc) 2) mostra grid + filtro opcional de naipe
+// Naipe/valor são opcionais: se a carta não tiver naipe, aparece em "Todos" e some ao filtrar.
 
 (function () {
   const TYPES = ["Base", "Incomum", "Rara", "Épica", "Lendária"];
   const SUITS = ["Todos", "Espadas", "Ouro", "Paus", "Copas"];
 
-  // Mock inicial (pra você ver funcionando já)
-  // Depois você troca isso pra vir do seu “pool” real de cartas.
+  // Mock inicial (só pra você ver funcionando AGORA)
+  // Depois a gente liga isso no seu pool real (cards.js + storage.js).
   const CARDS = [
-    { id: "b-001", nome: "Sentinela", tipo: "Base", naipe: "Espadas", valor: "A" },
-    { id: "b-002", nome: "Alquimista", tipo: "Base", naipe: "Ouro", valor: "7" },
-    { id: "b-003", nome: "Corvo", tipo: "Base", naipe: "Paus", valor: "3" },
-    { id: "b-004", nome: "Mercenária", tipo: "Base", naipe: "Copas", valor: "K" },
-    { id: "b-005", nome: "Relíquia", tipo: "Base", naipe: null, valor: null }, // exemplo sem naipe/valor
+    { id: "b-001", nome: "Sentinela", tipo: "Base", naipe: "Espadas", valor: "A", especial: null },
+    { id: "b-002", nome: "Alquimista", tipo: "Base", naipe: "Ouro", valor: "7", especial: null },
+    { id: "b-003", nome: "Corvo", tipo: "Base", naipe: "Paus", valor: "3", especial: null },
+    { id: "b-004", nome: "Mercenária", tipo: "Base", naipe: "Copas", valor: "K", especial: null },
+    { id: "b-005", nome: "Relíquia", tipo: "Base", naipe: null, valor: null, especial: "Artefato" },
 
-    { id: "r-001", nome: "Vórtice", tipo: "Rara", naipe: null, valor: null },
-    { id: "e-001", nome: "Acordo Sombrio", tipo: "Épica", naipe: "Espadas", valor: null },
-    { id: "l-001", nome: "O Juramento", tipo: "Lendária", naipe: null, valor: null }
+    { id: "i-001", nome: "Bênção Menor", tipo: "Incomum", naipe: "Copas", valor: null, especial: null },
+
+    { id: "r-001", nome: "Vórtice", tipo: "Rara", naipe: null, valor: null, especial: "Sem Naipe" },
+
+    { id: "e-001", nome: "Acordo Sombrio", tipo: "Épica", naipe: "Espadas", valor: null, especial: "Especial" },
+
+    { id: "l-001", nome: "O Juramento", tipo: "Lendária", naipe: null, valor: null, especial: "Lendária" }
   ];
 
   let state = {
-    selectedType: null,      // "Base" etc
-    selectedSuit: "Todos"    // "Todos" / suit
+    selectedType: null,     // "Base" etc
+    selectedSuit: "Todos"   // "Todos" / suit
   };
 
   function qs(sel) { return document.querySelector(sel); }
@@ -35,38 +40,42 @@
     const root = qs("#view-collection");
     if (!root) return;
 
-    // Monta estrutura uma vez (se você já tiver no HTML, dá pra remover isso)
-    if (!qs("#collectionTypes")) {
-      root.innerHTML = `
-        <div class="screen">
-          <div class="collection-wrap">
-            <h2 class="collection-title">Coleção</h2>
+    // Monta estrutura 1 vez
+    if (qs("#collectionTypes")) return;
 
-            <div class="collection-types" id="collectionTypes"></div>
+    root.innerHTML = `
+      <div class="collection-wrap">
+        <div class="collection-top">
+          <h2 class="collection-title">Coleção</h2>
 
-            <p class="collection-sub" id="collectionSub">
-              Escolha um tipo de coleção
-            </p>
-
-            <div class="suit-filter" id="suitFilter" style="display:none;"></div>
-
-            <div class="cards-grid" id="cardsGrid" style="display:none;"></div>
-
-            <div class="collection-back" id="collectionBack" style="display:none;">
-              <button class="pill-btn" id="btnCollectionBack">Voltar</button>
-            </div>
-          </div>
+          <button class="pill-btn small" id="btnCollectionExit" type="button">
+            Voltar
+          </button>
         </div>
-      `;
-    }
+
+        <div class="collection-types" id="collectionTypes"></div>
+
+        <p class="collection-sub" id="collectionSub">Escolha um tipo de coleção</p>
+
+        <div class="suit-filter" id="suitFilter" style="display:none;"></div>
+
+        <div class="cards-grid" id="cardsGrid" style="display:none;"></div>
+
+        <div class="collection-back" id="collectionBack" style="display:none;">
+          <button class="pill-btn" id="btnCollectionBack" type="button">Voltar aos tipos</button>
+        </div>
+      </div>
+    `;
 
     renderTypes();
     bindEvents();
+    render(); // estado inicial
   }
 
   function bindEvents() {
     const typesWrap = qs("#collectionTypes");
     const suitWrap = qs("#suitFilter");
+    const grid = qs("#cardsGrid");
 
     typesWrap.addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-type]");
@@ -80,12 +89,23 @@
       selectSuit(btn.dataset.suit);
     });
 
-    const backBtn = qs("#btnCollectionBack");
-    backBtn.addEventListener("click", () => {
-      // volta pra escolha de tipo
+    qs("#btnCollectionBack").addEventListener("click", () => {
       state.selectedType = null;
       state.selectedSuit = "Todos";
       render();
+    });
+
+    qs("#btnCollectionExit").addEventListener("click", () => {
+      // Voltar para HOME
+      window.UNPLED?.showView?.("view-home");
+    });
+
+    grid.addEventListener("click", (e) => {
+      const card = e.target.closest(".card-mini");
+      if (!card) return;
+      const id = card.dataset.id;
+      // Por enquanto só loga. Depois vira modal.
+      console.log("[UNPLED] clicou carta:", id);
     });
   }
 
@@ -119,7 +139,6 @@
     const grid = qs("#cardsGrid");
     const back = qs("#collectionBack");
 
-    // highlight tipos
     highlightType();
 
     if (!state.selectedType) {
@@ -133,7 +152,6 @@
     const cardsInType = CARDS.filter(c => c.tipo === state.selectedType);
     sub.textContent = `${state.selectedType} — ${cardsInType.length} carta(s)`;
 
-    // Suit filter: aparece sempre, mas é opcional (padrão: Todos)
     suitWrap.style.display = "flex";
     grid.style.display = "grid";
     back.style.display = "block";
@@ -154,7 +172,7 @@
     wrap.innerHTML = "";
 
     SUITS.forEach((s) => {
-      const b = el("button", "pill-btn");
+      const b = el("button", "pill-btn small");
       b.textContent = s;
       b.dataset.suit = s;
       wrap.appendChild(b);
@@ -179,10 +197,7 @@
       });
 
     if (cards.length === 0) {
-      const empty = el("div");
-      empty.style.gridColumn = "1 / -1";
-      empty.style.opacity = "0.8";
-      empty.style.padding = "20px 0";
+      const empty = el("div", "collection-empty");
       empty.textContent = "Nenhuma carta encontrada nesse filtro.";
       grid.appendChild(empty);
       return;
@@ -193,17 +208,22 @@
       card.dataset.id = c.id;
 
       const art = el("div", "art");
-      art.textContent = c.naipe ? (c.naipe[0].toUpperCase()) : "★";
+      art.textContent = c.naipe ? c.naipe[0].toUpperCase() : "★";
 
       const info = el("div", "info");
+
       const name = el("p", "name");
       name.textContent = c.nome;
 
       const meta = el("div", "meta");
-      meta.innerHTML = `
-        <span>${c.naipe ?? "Sem naipe"}</span>
-        <span>${c.valor ?? ""}</span>
-      `;
+      const left = el("span");
+      left.textContent = c.naipe ?? (c.especial ? c.especial : "Sem naipe");
+
+      const right = el("span");
+      right.textContent = c.valor ?? "";
+
+      meta.appendChild(left);
+      meta.appendChild(right);
 
       info.appendChild(name);
       info.appendChild(meta);
@@ -215,13 +235,19 @@
     });
   }
 
-  // API pública (pra ui.js chamar)
-  window.UnpledCollection = {
-    init() { mount(); },
-    open() {
-      // se seu ui.js usa views, só ativa a view e deixa o resto renderizar
-      mount();
-      render();
-    }
-  };
+  // ===== Integração com seu ui.js =====
+  function openCollection() {
+    mount();
+    render();
+  }
+
+  // quando o ui.js dispara o evento:
+  window.addEventListener("unpled:open-collection", openCollection);
+
+  // fallback: se você abrir direto a view e recarregar
+  document.addEventListener("DOMContentLoaded", () => {
+    // monta mas não força a view
+    mount();
+  });
+
 })();
