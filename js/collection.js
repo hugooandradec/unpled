@@ -1,32 +1,27 @@
 // js/collection.js
-// Coleção: 1) escolhe tipo (Base/Rara/etc) 2) mostra grid + filtro opcional de naipe
-// Naipe/valor são opcionais: se a carta não tiver naipe, aparece em "Todos" e some ao filtrar.
+// Coleção com:
+// - título grande central
+// - tipos sempre visíveis
+// - grid 4 colunas
+// - cartas mini
+// - clique -> modal fullscreen
 
 (function () {
   const TYPES = ["Base", "Incomum", "Rara", "Épica", "Lendária"];
   const SUITS = ["Todos", "Espadas", "Ouro", "Paus", "Copas"];
 
-  // Mock inicial (só pra você ver funcionando AGORA)
-  // Depois a gente liga isso no seu pool real (cards.js + storage.js).
+  // Por enquanto: Espadas (Ás - 4) na Base
+  // Ajuste os paths das imagens conforme seu projeto
   const CARDS = [
-    { id: "b-001", nome: "Sentinela", tipo: "Base", naipe: "Espadas", valor: "A", especial: null },
-    { id: "b-002", nome: "Alquimista", tipo: "Base", naipe: "Ouro", valor: "7", especial: null },
-    { id: "b-003", nome: "Corvo", tipo: "Base", naipe: "Paus", valor: "3", especial: null },
-    { id: "b-004", nome: "Mercenária", tipo: "Base", naipe: "Copas", valor: "K", especial: null },
-    { id: "b-005", nome: "Relíquia", tipo: "Base", naipe: null, valor: null, especial: "Artefato" },
-
-    { id: "i-001", nome: "Bênção Menor", tipo: "Incomum", naipe: "Copas", valor: null, especial: null },
-
-    { id: "r-001", nome: "Vórtice", tipo: "Rara", naipe: null, valor: null, especial: "Sem Naipe" },
-
-    { id: "e-001", nome: "Acordo Sombrio", tipo: "Épica", naipe: "Espadas", valor: null, especial: "Especial" },
-
-    { id: "l-001", nome: "O Juramento", tipo: "Lendária", naipe: null, valor: null, especial: "Lendária" }
+    { id: "sp-a", nome: "Ás de Espadas", tipo: "Base", naipe: "Espadas", valor: "A", img: "assets/cards/base/espadas/A_espadas.png" },
+    { id: "sp-2", nome: "2 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "2", img: "assets/cards/base/espadas/2_espadas.png" },
+    { id: "sp-3", nome: "3 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "3", img: "assets/cards/base/espadas/3_espadas.png" },
+    { id: "sp-4", nome: "4 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "4", img: "assets/cards/base/espadas/4_espadas.png" }
   ];
 
   let state = {
-    selectedType: null,     // "Base" etc
-    selectedSuit: "Todos"   // "Todos" / suit
+    selectedType: "Base",
+    selectedSuit: "Todos"
   };
 
   function qs(sel) { return document.querySelector(sel); }
@@ -39,80 +34,81 @@
   function mount() {
     const root = qs("#view-collection");
     if (!root) return;
-
-    // Monta estrutura 1 vez
     if (qs("#collectionTypes")) return;
 
     root.innerHTML = `
       <div class="collection-wrap">
-        <div class="collection-top">
-          <h2 class="collection-title">Coleção</h2>
-
-          <button class="pill-btn small" id="btnCollectionExit" type="button">
-            Voltar
-          </button>
-        </div>
+        <h2 class="collection-title">Coleção</h2>
 
         <div class="collection-types" id="collectionTypes"></div>
 
-        <p class="collection-sub" id="collectionSub">Escolha um tipo de coleção</p>
+        <p class="collection-sub" id="collectionSub"></p>
 
-        <div class="suit-filter" id="suitFilter" style="display:none;"></div>
+        <div class="suit-filter" id="suitFilter"></div>
 
-        <div class="cards-grid" id="cardsGrid" style="display:none;"></div>
+        <div class="cards-grid" id="cardsGrid"></div>
+      </div>
 
-        <div class="collection-back" id="collectionBack" style="display:none;">
-          <button class="pill-btn" id="btnCollectionBack" type="button">Voltar aos tipos</button>
+      <!-- Modal fullscreen -->
+      <div class="card-modal" id="cardModal" aria-hidden="true">
+        <button class="card-modal-close" id="cardModalClose" type="button">Fechar</button>
+        <div class="card-modal-inner" id="cardModalInner">
+          <figure class="card-modal-figure">
+            <img id="cardModalImg" alt="Carta" />
+          </figure>
         </div>
       </div>
     `;
 
     renderTypes();
+    renderSuits();
     bindEvents();
-    render(); // estado inicial
+    render(); // já abre mostrando Base + Todos
   }
 
   function bindEvents() {
-    const typesWrap = qs("#collectionTypes");
-    const suitWrap = qs("#suitFilter");
-    const grid = qs("#cardsGrid");
-
-    typesWrap.addEventListener("click", (e) => {
+    qs("#collectionTypes").addEventListener("click", (e) => {
       const btn = e.target.closest("button[data-type]");
       if (!btn) return;
-      selectType(btn.dataset.type);
-    });
-
-    suitWrap.addEventListener("click", (e) => {
-      const btn = e.target.closest("button[data-suit]");
-      if (!btn) return;
-      selectSuit(btn.dataset.suit);
-    });
-
-    qs("#btnCollectionBack").addEventListener("click", () => {
-      state.selectedType = null;
+      state.selectedType = btn.dataset.type;
       state.selectedSuit = "Todos";
       render();
     });
 
-    qs("#btnCollectionExit").addEventListener("click", () => {
-      // Voltar para HOME
-      window.UNPLED?.showView?.("view-home");
+    qs("#suitFilter").addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-suit]");
+      if (!btn) return;
+      state.selectedSuit = btn.dataset.suit;
+      render();
     });
 
-    grid.addEventListener("click", (e) => {
+    qs("#cardsGrid").addEventListener("click", (e) => {
       const card = e.target.closest(".card-mini");
       if (!card) return;
-      const id = card.dataset.id;
-      // Por enquanto só loga. Depois vira modal.
-      console.log("[UNPLED] clicou carta:", id);
+      openModal(card.dataset.id);
     });
+
+    // Modal
+    const modal = qs("#cardModal");
+    qs("#cardModalClose").addEventListener("click", closeModal);
+
+    // clicar fora fecha
+    qs("#cardModalInner").addEventListener("click", (e) => {
+      if (e.target.id === "cardModalInner") closeModal();
+    });
+
+    // ESC fecha
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    // impedir scroll do body quando modal abre
+    modal.addEventListener("transitionend", () => {});
   }
 
   function renderTypes() {
     const wrap = qs("#collectionTypes");
     wrap.innerHTML = "";
-
     TYPES.forEach((t) => {
       const b = el("button", "pill-btn");
       b.textContent = t;
@@ -121,56 +117,9 @@
     });
   }
 
-  function selectType(type) {
-    state.selectedType = type;
-    state.selectedSuit = "Todos";
-    render();
-  }
-
-  function selectSuit(suit) {
-    state.selectedSuit = suit;
-    renderCards();
-    highlightSuit();
-  }
-
-  function render() {
-    const sub = qs("#collectionSub");
-    const suitWrap = qs("#suitFilter");
-    const grid = qs("#cardsGrid");
-    const back = qs("#collectionBack");
-
-    highlightType();
-
-    if (!state.selectedType) {
-      sub.textContent = "Escolha um tipo de coleção";
-      suitWrap.style.display = "none";
-      grid.style.display = "none";
-      back.style.display = "none";
-      return;
-    }
-
-    const cardsInType = CARDS.filter(c => c.tipo === state.selectedType);
-    sub.textContent = `${state.selectedType} — ${cardsInType.length} carta(s)`;
-
-    suitWrap.style.display = "flex";
-    grid.style.display = "grid";
-    back.style.display = "block";
-
-    renderSuits();
-    renderCards();
-    highlightSuit();
-  }
-
-  function highlightType() {
-    document.querySelectorAll("#collectionTypes .pill-btn").forEach((b) => {
-      b.classList.toggle("active", b.dataset.type === state.selectedType);
-    });
-  }
-
   function renderSuits() {
     const wrap = qs("#suitFilter");
     wrap.innerHTML = "";
-
     SUITS.forEach((s) => {
       const b = el("button", "pill-btn small");
       b.textContent = s;
@@ -179,24 +128,33 @@
     });
   }
 
-  function highlightSuit() {
-    document.querySelectorAll("#suitFilter .pill-btn").forEach((b) => {
-      b.classList.toggle("active", b.dataset.suit === state.selectedSuit);
+  function render() {
+    highlight("#collectionTypes .pill-btn", "type", state.selectedType);
+    highlight("#suitFilter .pill-btn", "suit", state.selectedSuit);
+
+    const cardsInType = CARDS.filter(c => c.tipo === state.selectedType);
+    const shown = cardsInType.filter(c => {
+      if (state.selectedSuit === "Todos") return true;
+      return c.naipe === state.selectedSuit;
+    });
+
+    qs("#collectionSub").textContent = `${state.selectedType} — ${shown.length} carta(s)`;
+
+    renderCards(shown);
+  }
+
+  function highlight(selector, dataKey, value) {
+    document.querySelectorAll(selector).forEach((b) => {
+      const key = dataKey === "type" ? b.dataset.type : b.dataset.suit;
+      b.classList.toggle("active", key === value);
     });
   }
 
-  function renderCards() {
+  function renderCards(cards) {
     const grid = qs("#cardsGrid");
     grid.innerHTML = "";
 
-    const cards = CARDS
-      .filter(c => c.tipo === state.selectedType)
-      .filter(c => {
-        if (state.selectedSuit === "Todos") return true;
-        return c.naipe === state.selectedSuit;
-      });
-
-    if (cards.length === 0) {
+    if (!cards.length) {
       const empty = el("div", "collection-empty");
       empty.textContent = "Nenhuma carta encontrada nesse filtro.";
       grid.appendChild(empty);
@@ -208,22 +166,20 @@
       card.dataset.id = c.id;
 
       const art = el("div", "art");
-      art.textContent = c.naipe ? c.naipe[0].toUpperCase() : "★";
+      const img = document.createElement("img");
+      img.src = c.img || "";
+      img.alt = c.nome;
+      art.appendChild(img);
 
       const info = el("div", "info");
-
       const name = el("p", "name");
       name.textContent = c.nome;
 
       const meta = el("div", "meta");
-      const left = el("span");
-      left.textContent = c.naipe ?? (c.especial ? c.especial : "Sem naipe");
-
-      const right = el("span");
-      right.textContent = c.valor ?? "";
-
-      meta.appendChild(left);
-      meta.appendChild(right);
+      meta.innerHTML = `
+        <span>${c.naipe ?? "Sem naipe"}</span>
+        <span>${c.valor ?? ""}</span>
+      `;
 
       info.appendChild(name);
       info.appendChild(meta);
@@ -235,18 +191,40 @@
     });
   }
 
-  // ===== Integração com seu ui.js =====
-  function openCollection() {
-    mount();
-    render();
+  function openModal(cardId) {
+    const c = CARDS.find(x => x.id === cardId);
+    if (!c) return;
+
+    const modal = qs("#cardModal");
+    const img = qs("#cardModalImg");
+
+    img.src = c.img || "";
+    img.alt = c.nome;
+
+    modal.classList.add("show");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
   }
 
-  // quando o ui.js dispara o evento:
+  function closeModal() {
+    const modal = qs("#cardModal");
+    if (!modal) return;
+
+    modal.classList.remove("show");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "hidden"; // seu body já é hidden; mantém consistente
+  }
+
+  // Integração com seu ui.js (evento que você já usa)
+  function openCollection() {
+    mount();
+    render(); // garante base/todos renderizado
+  }
+
   window.addEventListener("unpled:open-collection", openCollection);
 
-  // fallback: se você abrir direto a view e recarregar
+  // fallback
   document.addEventListener("DOMContentLoaded", () => {
-    // monta mas não força a view
     mount();
   });
 
