@@ -2,52 +2,53 @@
 
 .collection-wrap {
   width: min(980px, 92vw);
-  margin: 18px auto 0;
+  margin: 20px auto 0;
   text-align: center;
 }
 
-/* Título grande e central no topo */
+/* Título maior e com mais respiro */
 .collection-title {
-  margin: 10px 0 16px;
+  margin: 14px 0 26px;
   font-weight: 900;
-  letter-spacing: 0.28em;
+  letter-spacing: 0.30em;
   text-transform: uppercase;
-  font-size: 26px;            /* maior */
-  opacity: 0.95;
-  text-shadow: 0 2px 18px rgba(0,0,0,0.65);
+  font-size: 34px;            /* MAIOR */
+  opacity: 0.96;
+  text-shadow: 0 2px 22px rgba(0,0,0,0.70);
 }
 
-/* Linha dos tipos */
+/* Linha dos tipos (desce mais) */
 .collection-types {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 12px;
   justify-content: center;
-  margin: 0 0 10px;
+  margin: 0 0 16px;           /* mais espaço */
 }
 
-/* Subtexto */
+/* Subtexto (Base — X carta(s)) maior */
 .collection-sub {
-  margin: 0 0 12px;
-  font-size: 12px;
-  opacity: 0.75;
+  margin: 0 0 16px;
+  font-size: 15px;            /* MAIOR */
+  font-weight: 700;
+  opacity: 0.82;
 }
 
-/* Filtro de naipe */
+/* Filtro de naipe (desce um pouco) */
 .suit-filter {
   display: flex;
   gap: 10px;
   justify-content: center;
   flex-wrap: wrap;
-  margin: 0 0 18px;
+  margin: 0 0 22px;           /* mais espaço */
 }
 
 /* Pílulas */
 .pill-btn {
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.14);
   background: rgba(15, 18, 30, 0.35);
-  color: rgba(255,255,255,0.88);
-  padding: 10px 12px;
+  color: rgba(255,255,255,0.90);
+  padding: 10px 13px;
   border-radius: 999px;
   cursor: pointer;
   user-select: none;
@@ -65,35 +66,38 @@
 }
 
 .pill-btn.small {
-  padding: 8px 10px;
+  padding: 8px 11px;
   font-size: 10px;
 }
 
 .pill-btn:hover {
   transform: translateY(-1px);
-  border-color: rgba(167, 139, 250, 0.35);
+  border-color: rgba(167, 139, 250, 0.38);
 }
 
 .pill-btn.active {
-  border-color: rgba(167, 139, 250, 0.55);
-  background: rgba(167, 139, 250, 0.18);
+  border-color: rgba(167, 139, 250, 0.62);
+  background: rgba(167, 139, 250, 0.20);
 }
 
 /* ===== GRID: 4 cartas por fileira ===== */
 .cards-grid {
   display: grid;
-  gap: 14px;
-  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 colunas */
-  align-items: stretch;
+  gap: 18px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
   justify-items: stretch;
+
+  /* desce um pouco o grid pra não ficar colado */
+  margin-top: 6px;
 }
 
-/* Carta pequena */
+/* Carta pequena, mas sem cortar imagem */
 .card-mini {
-  border-radius: 16px;
+  border-radius: 18px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(12, 14, 22, 0.45);
+  background: rgba(12, 14, 22, 0.40);
   box-shadow: 0 18px 40px rgba(0,0,0,0.35);
   cursor: pointer;
   transition: transform 140ms ease, border-color 140ms ease, opacity 140ms ease;
@@ -104,49 +108,35 @@
   border-color: rgba(167, 139, 250, 0.35);
 }
 
-/* Área de arte (mini) */
+/* Área de arte com proporção de carta */
 .card-mini .art {
-  height: 110px;
+  width: 100%;
+  aspect-ratio: 3 / 2;        /* fica “cartinha deitada” como suas imagens */
   background: rgba(255,255,255,0.06);
   display: grid;
   place-items: center;
+  padding: 10px;              /* respiro pra imagem não colar na borda */
 }
 
 .card-mini .art img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;        /* NÃO CORTA MAIS */
   display: block;
 }
 
-/* Info */
+/* Esconde nome/meta (pra não aparecer em cima da imagem) */
 .card-mini .info {
-  padding: 10px 10px 12px;
+  display: none;
 }
 
-.card-mini .name {
-  margin: 0;
-  font-weight: 900;
-  font-size: 12px;
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  opacity: 0.95;
-}
-
-.card-mini .meta {
-  margin: 6px 0 0;
-  font-size: 11px;
-  opacity: 0.72;
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-}
-
+/* Mensagem de vazio maior */
 .collection-empty {
   grid-column: 1 / -1;
   padding: 18px 0;
-  opacity: 0.8;
-  font-size: 13px;
+  opacity: 0.85;
+  font-size: 15px;            /* MAIOR */
+  font-weight: 700;
 }
 
 /* ===== MODAL FULLSCREEN ===== */
@@ -174,11 +164,11 @@
 
 .card-modal-close {
   position: absolute;
-  top: 72px; /* abaixo da topbar */
+  top: 72px;
   right: 18px;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.14);
   background: rgba(15, 18, 30, 0.35);
-  color: rgba(255,255,255,0.88);
+  color: rgba(255,255,255,0.90);
   padding: 10px 12px;
   border-radius: 999px;
   cursor: pointer;
@@ -189,13 +179,16 @@
 }
 
 .card-modal-figure {
-  width: min(560px, 92vw);
-  aspect-ratio: 3 / 4;
+  width: min(720px, 94vw);
+  aspect-ratio: 16 / 9;       /* como suas cartas deitadas */
   border-radius: 18px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.12);
   background: rgba(12, 14, 22, 0.55);
   box-shadow: 0 28px 90px rgba(0,0,0,0.65);
+  padding: 14px;
+  display: grid;
+  place-items: center;
 }
 
 .card-modal-figure img {
@@ -208,10 +201,10 @@
 /* Responsivo */
 @media (max-width: 900px) {
   .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .collection-title { font-size: 22px; }
+  .collection-title { font-size: 28px; }
 }
 
 @media (max-width: 520px) {
   .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .collection-title { font-size: 20px; letter-spacing: 0.22em; }
+  .collection-title { font-size: 24px; letter-spacing: 0.24em; }
 }
