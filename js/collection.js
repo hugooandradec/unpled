@@ -143,7 +143,7 @@
     cards.forEach((c) => {
       const card = el("div", "card-mini");
       card.dataset.id = c.id;
-      card.dataset.tipo = c.tipo; // borda Base via CSS
+      card.dataset.tipo = c.tipo;
 
       const art = el("div", "art");
       const img = document.createElement("img");
@@ -158,9 +158,7 @@
       art.appendChild(img);
       card.appendChild(art);
 
-      const info = el("div", "info");
-      card.appendChild(info);
-
+      card.appendChild(el("div", "info"));
       grid.appendChild(card);
     });
   }
