@@ -1,293 +1,222 @@
+/* css/styles.css */
+
+/* ===== Reset básico ===== */
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+
 body {
   margin: 0;
-  background: #0d0f18;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color: #fff;
-  font-family: system-ui, sans-serif;
+  overflow: hidden;
+
+  /* fundo (imagem) */
+  background: #05060a;
+  background-image: url("../assets/img/bg-home.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
-.screen {
-  min-height: 100vh;
-}
-
-.view {
-  display: none;
-  padding: 40px;
-}
-
-.view.active {
-  display: block;
-}
-
-.logo {
-  text-align: center;
-  font-size: 64px;
-  margin-bottom: 40px;
-}
-
-.menu {
-  display: grid;
-  gap: 16px;
-  max-width: 300px;
-  margin: auto;
-}
-
-.menu-item {
-  padding: 16px;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-/* ===== COLEÇÃO ===== */
-
-.collection-title {
-  text-align: center;
-  font-size: 48px;
-  margin-bottom: 20px;
-}
-
-.suits-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  max-width: 800px;
-  margin: auto;
-}
-
-.suit-btn {
-  padding: 20px;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-/* ===== ÁLBUM ===== */
-
-.album-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  max-width: 900px;
-  margin: 30px auto;
-}
-
-.card {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 2 / 3;
-}
-
-.card img {
-  position: absolute;
+/* ===== Camadas de atmosfera (Steam-like) ===== */
+.bg-overlay {
+  position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, rgba(10, 12, 20, 0.10) 0%, rgba(10, 12, 20, 0.55) 55%, rgba(0,0,0,0.85) 100%),
+    radial-gradient(ellipse at 50% 35%, rgba(110, 60, 170, 0.18) 0%, rgba(110, 60, 170, 0.00) 50%),
+    linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.10) 25%, rgba(0,0,0,0.55) 100%);
+  z-index: 0;
 }
 
-.card-fallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  background: #222;
-  color: #aaa;
-  font-size: 32px;
+/* ===== TOPBAR (agora fica certo, alinhado) ===== */
+.topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  height: 58px;
+  padding: 0 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  z-index: 5;
+
+  /* vidro escuro */
+  background: rgba(10, 12, 20, 0.30);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.35);
 }
 
-.back-btn {
-  display: block;
-  margin: 30px auto;
-  padding: 14px 24px;
-  cursor: pointer;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
+.brand-title {
+  font-weight: 900;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 12px;
+  opacity: 0.95;
+  text-shadow: 0 1px 14px rgba(0,0,0,0.6);
+}
 
-/* ===== SPA Views ===== */
+.wallet {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 10px;
+  border-radius: 999px;
+
+  background: rgba(15, 18, 30, 0.45);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.30);
+  font-size: 12px;
+  opacity: 0.95;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #9aa4b2;
+  box-shadow: 0 0 12px rgba(0,0,0,0.25);
+}
+.dot.online { background: #22c55e; box-shadow: 0 0 14px rgba(34,197,94,0.35); }
+.dot.offline { background: #ef4444; box-shadow: 0 0 14px rgba(239,68,68,0.25); }
+
+/* ===== Views / tela ===== */
 .view { display: none; }
 .view.active { display: block; }
 
-/* o body tá overflow:hidden no seu css (cinemático).
-   Pra coleção rolar, a rolagem fica no main */
-.main {
-  height: calc(100vh - 64px);
-  overflow: auto;
-  padding-bottom: 30px;
-}
-
-/* ===== Coleção / Álbum ===== */
-.collection-wrap{
-  width: min(980px, 92vw);
-  margin: 0 auto;
-  padding-top: 22px;
-  display: grid;
-  gap: 14px;
-}
-
-.collection-title{
-  font-size: clamp(34px, 4.2vw, 56px);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  text-align: center;
-  text-shadow: 0 2px 24px rgba(0,0,0,.65), 0 0 28px rgba(140,90,220,.20);
-}
-
-.collection-sub, .album-sub{
-  text-align: center;
-  opacity: .78;
-  letter-spacing: .08em;
-  font-size: 13px;
-  text-shadow: 0 2px 14px rgba(0,0,0,.55);
-}
-
-.suits-grid{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 10px;
-}
-
-@media (min-width: 720px){
-  .suits-grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
-.suit-btn{
-  width: 100%;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(15,18,30,.55);
-  color: rgba(255,255,255,.92);
-  border-radius: 16px;
-  padding: 16px 14px;
-  display: grid;
-  gap: 10px;
-  cursor: pointer;
-  box-shadow: 0 14px 34px rgba(0,0,0,.45), 0 0 0 1px rgba(0,0,0,.25) inset;
-  transition: transform .14s ease, background .14s ease, border-color .14s ease, box-shadow .14s ease;
-}
-
-.suit-btn:hover{
-  transform: translateY(-2px);
-  background: rgba(20,24,40,.62);
-  border-color: rgba(165,120,255,.20);
-  box-shadow: 0 18px 44px rgba(0,0,0,.55), 0 0 26px rgba(140,90,220,.14);
-}
-
-.suit-symbol{ font-size: 30px; opacity: .92; }
-.suit-label{ font-weight: 900; letter-spacing: .06em; }
-
-.album-header{
-  display: grid;
-  grid-template-columns: 44px 1fr;
-  align-items: center;
-  gap: 10px;
-  margin-top: 6px;
-  padding: 10px 12px;
-  border-radius: 16px;
-  background: rgba(10,12,20,.42);
-  border: 1px solid rgba(165,120,255,.14);
-  backdrop-filter: blur(10px);
-}
-
-.album-back{
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(15,18,30,.55);
-  color: rgba(255,255,255,.92);
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.album-title{
-  font-weight: 900;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  opacity: .92;
-}
-
-.album-grid{
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 10px;
-}
-
-@media (min-width: 620px){
-  .album-grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
-.card-tile{
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.08);
-  background: rgba(15,18,30,.55);
-  box-shadow: 0 18px 40px rgba(0,0,0,.55);
-  transition: transform .14s ease, box-shadow .14s ease, border-color .14s ease;
-}
-
-.card-tile:hover{
-  transform: translateY(-3px);
-  border-color: rgba(185,140,255,.22);
-  box-shadow: 0 26px 60px rgba(0,0,0,.70), 0 0 34px rgba(140,90,220,.18);
-}
-
-.card-stack{
+.screen {
   position: relative;
-  width: 100%;
-  aspect-ratio: 2 / 3;
-}
-
-.card-art,
-.card-frame{
-  position: absolute;
-  inset: 0;
-  width: 100%;
+  z-index: 2;
   height: 100%;
-  object-fit: contain;
+  padding: 24px;
+
+  /* espaço da topbar */
+  padding-top: 58px;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
 }
 
-.card-frame{
-  pointer-events: none;
+/* ===== HOME ===== */
+.hero {
+  width: min(980px, 92vw);
+
+  /* título mais pra cima */
+  margin-top: 46px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
 }
 
-.card-caption{
-  padding: 10px 10px;
-  text-align: center;
-  font-weight: 800;
-  letter-spacing: .06em;
-  opacity: .86;
+.logo {
+  text-align: left;
 }
 
-.card-fallback{
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  gap: 6px;
-  background: radial-gradient(ellipse at center, rgba(140,90,220,.18), rgba(0,0,0,.65));
-}
-
-.card-fallback-rank{
-  font-size: 28px;
+.logo h1 {
+  margin: 0;
   font-weight: 900;
-  letter-spacing: .08em;
-}
-.card-fallback-suit{
-  font-size: 26px;
-  opacity: .9;
-}
-
-.collection-back{
-  margin: 10px auto 0;
-  width: min(420px, 92vw);
-  padding: 14px 14px;
-  border-radius: 14px;
-  cursor: pointer;
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(15,18,30,.55);
-  color: rgba(255,255,255,.92);
-  font-weight: 900;
-  letter-spacing: .06em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  box-shadow: 0 14px 34px rgba(0,0,0,.45);
+  font-size: clamp(42px, 6vw, 78px);
+
+  text-shadow:
+    0 2px 18px rgba(0,0,0,0.65),
+    0 0 24px rgba(140, 90, 220, 0.25);
+}
+
+/* ===== MENU (lado esquerdo, sem fundo) ===== */
+.menu-wrap {
+  width: min(420px, 92vw);
+  padding: 0;              /* sem card */
+  background: transparent;  /* sem fundo */
+  border: 0;
+  box-shadow: none;
+}
+
+.menu {
+  margin: 0;
+  padding: 0;
+  list-style: none; /* tira as bolinhas */
+  display: grid;
+  gap: 10px;
+}
+
+/* botão estilo “Steam text menu” */
+.menu-item {
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+
+  padding: 8px 0;
+  border: 0;
+  background: transparent;
+
+  cursor: pointer;
+  user-select: none;
+
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  font-size: 16px;
+  color: rgba(255,255,255,0.86);
+
+  text-shadow: 0 1px 14px rgba(0,0,0,0.55);
+  transition: transform 140ms ease, color 140ms ease, opacity 140ms ease;
+  outline: none;
+}
+
+.menu-item:hover {
+  transform: translateX(2px);
+  color: rgba(255,255,255,0.96);
+}
+
+/* selecionado/ativo */
+.menu-item.is-active,
+.menu-item:focus-visible {
+  color: rgba(255,255,255,0.98);
+}
+
+/* setinha do item ativo */
+.menu-item.is-active::before {
+  content: "›";
+  display: inline-block;
+  margin-right: 10px;
+  font-size: 22px;
+  transform: translateY(-1px);
+  opacity: 0.9;
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 520px) {
+  .hero { margin-top: 34px; }
+  .logo h1 { letter-spacing: 0.18em; }
+  .menu-item { font-size: 15px; }
+}
+
+/* ===== Acessibilidade ===== */
+@media (prefers-reduced-motion: reduce) {
+  .menu-item { transition: none; }
 }

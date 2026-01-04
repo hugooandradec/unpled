@@ -6,24 +6,18 @@
   <meta name="theme-color" content="#14161a" />
   <title>UNPLED</title>
 
-  <!-- se não estiver usando manifest ainda, pode remover -->
-  <link rel="manifest" href="manifest.webmanifest" />
-
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="stylesheet" href="./css/styles.css" />
 </head>
 
 <body>
-  <!-- FUNDO -->
+  <!-- atmosfera -->
   <div class="bg-overlay"></div>
 
-  <!-- TOPO -->
+  <!-- TOP BAR (status + moedas) -->
   <header class="topbar">
     <div class="brand">
-      <div class="logo">🃏</div>
-      <div>
-        <div class="title">UNPLED</div>
-        <div class="sub" id="statusText">Offline-ready</div>
-      </div>
+      <div class="brand-title">UNPLED</div>
     </div>
 
     <div class="wallet">
@@ -31,6 +25,7 @@
         <span class="dot" id="onlineDot"></span>
         <span id="onlineLabel">—</span>
       </div>
+
       <div class="pill">
         <span>🪙</span>
         <strong id="coinsLabel">0</strong>
@@ -38,38 +33,20 @@
     </div>
   </header>
 
-  <!-- MAIN -->
-  <main class="main screen">
-
+  <main class="screen">
     <!-- HOME -->
     <section class="view active" id="view-home">
       <div class="hero">
         <div class="logo">
           <h1>UNPLED</h1>
-          <p>Deck • Gacha • Roguelike vibes</p>
+          <!-- removi o subtítulo conforme você pediu -->
         </div>
 
         <div class="menu-wrap">
           <ul class="menu">
-
-            <li>
-              <button class="menu-item is-active" data-action="play">
-                Jogar
-              </button>
-            </li>
-
-            <li>
-              <button class="menu-item" data-action="collection">
-                Coleção
-              </button>
-            </li>
-
-            <li>
-              <button class="menu-item" data-action="settings">
-                Configurações
-              </button>
-            </li>
-
+            <li><button class="menu-item is-active" data-action="play">Jogar</button></li>
+            <li><button class="menu-item" data-action="collection">Coleção</button></li>
+            <li><button class="menu-item" data-action="settings">Configurações</button></li>
           </ul>
         </div>
       </div>
@@ -83,14 +60,9 @@
 
     <!-- SETTINGS -->
     <section class="view" id="view-settings"></section>
-
   </main>
 
-  <footer class="footer">
-    <span class="muted small">UNPLED • PWA • Offline-first</span>
-  </footer>
-
-  <script src="js/ui.js"></script>
-  <script src="js/collection.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/collection.js"></script>
 </body>
 </html>
