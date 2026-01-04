@@ -1,4 +1,4 @@
-import { BASE_POOL } from "../data/cards.js"; 
+import { BASE_POOL } from "./cards.js";
 
 export function openPack() {
   const pack = [];
