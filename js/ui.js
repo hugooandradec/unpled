@@ -27,30 +27,30 @@ export function showView(name) {
 }
 
 // =========================
-// HOME (MENU INICIAL)
+// HOME (STEAM VIBE)
 // =========================
 export function renderHomeView() {
   const root = document.getElementById("view-home");
   if (!root) return;
 
   root.innerHTML = `
-    <div class="card panel">
-      <div style="text-align:center; padding: 6px 0 2px;">
-        <h1 style="font-size:32px; margin:0 0 6px;">UNPLED</h1>
-        <p class="muted" style="margin:0;">Um jogo de cartas em construção</p>
+    <div class="home-hero">
+      <div class="home-content">
+        <div class="home-title">
+          <h1>UNPLED</h1>
+          <p>Deck • Gacha • Roguelike vibes</p>
+        </div>
+
+        <div class="home-menu">
+          <button class="menu-link" id="btnGoPlay">Jogar</button>
+          <button class="menu-link" id="btnGoCollection">Coleção</button>
+          <button class="menu-link" id="btnGoSettings">Configurações</button>
+        </div>
+
+        <div class="home-footerhint">
+          Pressione <strong>Jogar</strong> para começar
+        </div>
       </div>
-
-      <div class="spacer"></div>
-
-      <button class="btn primary" id="btnGoPlay">Jogar</button>
-
-      <div class="spacer"></div>
-
-      <button class="btn" id="btnGoCollection">Coleção</button>
-
-      <div class="spacer"></div>
-
-      <button class="btn" id="btnGoSettings">Configurações</button>
     </div>
   `;
 }
