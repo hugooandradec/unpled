@@ -8,64 +8,32 @@
 
   <link rel="manifest" href="./manifest.webmanifest" />
 
-  <!-- CSS separado -->
-  <link rel="stylesheet" href="./css/global.css" />
-  <link rel="stylesheet" href="./css/index.css" />
-  <link rel="stylesheet" href="./css/collection.css" />
+  <!-- CSS (ordem importa: global -> página -> coleção) -->
+  <link rel="stylesheet" href="./css/global.css?v=1" />
+  <link rel="stylesheet" href="./css/index.css?v=1" />
+  <link rel="stylesheet" href="./css/collection.css?v=1" />
 </head>
 
 <body>
-  <!-- atmosfera -->
   <div class="bg-overlay"></div>
 
-  <!-- TOP BAR (status + moedas) -->
   <header class="topbar">
-    <div class="brand">
-      <div class="brand-title">UNPLED</div>
-    </div>
-
-    <div class="wallet">
-      <div class="pill">
-        <span class="dot" id="onlineDot"></span>
-        <span id="onlineLabel">—</span>
-      </div>
-
-      <div class="pill">
-        <span>🪙</span>
-        <strong id="coinsLabel">0</strong>
-      </div>
+    <div class="brand">UNPLED</div>
+    <div class="status">
+      <span class="dot"></span>
+      <span class="label">Online</span>
+      <span class="pill">0</span>
     </div>
   </header>
 
   <main class="screen">
-    <!-- HOME -->
-    <section class="view active" id="view-home">
-      <div class="hero">
-        <div class="logo">
-          <h1>UNPLED</h1>
-        </div>
-
-        <div class="menu-wrap">
-          <ul class="menu">
-            <li><button class="menu-item is-active" data-action="play">Jogar</button></li>
-            <li><button class="menu-item" data-action="collection">Coleção</button></li>
-            <li><button class="menu-item" data-action="settings">Configurações</button></li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- GAME -->
+    <section class="view active" id="view-home"></section>
     <section class="view" id="view-play"></section>
-
-    <!-- COLLECTION -->
     <section class="view" id="view-collection"></section>
-
-    <!-- SETTINGS -->
     <section class="view" id="view-settings"></section>
   </main>
 
-  <script src="./js/ui.js"></script>
-  <script src="./js/collection.js"></script>
+  <script src="./js/ui.js?v=1"></script>
+  <script src="./js/collection.js?v=1"></script>
 </body>
 </html>
