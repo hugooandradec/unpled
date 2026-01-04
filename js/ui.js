@@ -1,7 +1,5 @@
-// ui.js
-
+// js/ui.js
 (function () {
-  // ===== util: ativa/desativa classe "is-active" =====
   function setActive(items, idx) {
     items.forEach((el, i) => el.classList.toggle("is-active", i === idx));
   }
@@ -12,19 +10,41 @@
 
   // ===== status online/offline (HUD) =====
   function updateNetStatus() {
-    const dot = document.querySelector(".hud .dot");
-    const label = document.querySelector(".hud .label");
+    const dot = document.getElementById("onlineDot");
+    const label = document.getElementById("onlineLabel");
+    const statusText = document.getElementById("statusText");
+
     if (!dot || !label) return;
 
     const online = navigator.onLine;
+
     dot.classList.toggle("online", online);
     dot.classList.toggle("offline", !online);
+
     label.textContent = online ? "Online" : "Offline";
+    if (statusText) statusText.textContent = online ? "Online" : "Offline-ready";
   }
 
-  // ===== navegação de menu (teclado + mouse) =====
+  // ===== troca de views (SPA simples) =====
+  function showView(viewId) {
+    const views = Array.from(document.querySelectorAll(".view"));
+    if (!views.length) return;
+
+    views.forEach(v => v.classList.remove("active"));
+    const target = document.getElementById(viewId);
+    if (target) target.classList.add("active");
+
+    // rola pro topo quando troca
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }
+
+  // expõe pra outros scripts (collection.js)
+  window.UNPLED = window.UNPLED || {};
+  window.UNPLED.showView = showView;
+
+  // ===== Menu da Home (setas + enter) =====
   function initMenu() {
-    const items = Array.from(document.querySelectorAll(".menu-item"));
+    const items = Array.from(document.querySelectorAll("#view-home .menu-item"));
     if (!items.length) return;
 
     let activeIndex = clamp(
@@ -35,7 +55,6 @@
 
     setActive(items, activeIndex);
 
-    // mouse hover também "seleciona"
     items.forEach((el, idx) => {
       el.addEventListener("mouseenter", () => {
         activeIndex = idx;
@@ -48,8 +67,6 @@
       });
 
       el.addEventListener("click", (e) => {
-        // se for <a>, deixa navegar normal.
-        // se for <button/div>, dispare pelo data-action.
         const action = el.getAttribute("data-action");
         if (action) {
           e.preventDefault();
@@ -58,9 +75,12 @@
       });
     });
 
-    // teclado: setas + enter
     window.addEventListener("keydown", (e) => {
       const key = e.key;
+
+      // só navega no menu quando a home está ativa
+      const homeActive = document.getElementById("view-home")?.classList.contains("active");
+      if (!homeActive) return;
 
       if (key === "ArrowUp" || key === "w" || key === "W") {
         e.preventDefault();
@@ -84,35 +104,26 @@
         if (action) {
           e.preventDefault();
           triggerAction(action);
-          return;
-        }
-
-        // se for link, navega
-        const href = el.getAttribute("href");
-        if (href) {
-          e.preventDefault();
-          window.location.href = href;
         }
       }
     });
   }
 
-  // ===== ações (ajusta aqui pro teu projeto) =====
+  // ===== ações do menu =====
   function triggerAction(action) {
-    // Aqui você pluga no teu roteamento / páginas
-    // Só deixei um padrão bem simples:
     switch (action) {
       case "play":
-        // exemplo: ir pra tela do jogo
-        window.location.href = "games/money-clicker/index.html";
+        showView("view-play");
         break;
 
       case "collection":
-        window.location.href = "collection.html";
+        showView("view-collection");
+        // avisa o módulo de coleção pra renderizar (se existir)
+        window.dispatchEvent(new CustomEvent("unpled:open-collection"));
         break;
 
       case "settings":
-        window.location.href = "settings.html";
+        showView("view-settings");
         break;
 
       default:
