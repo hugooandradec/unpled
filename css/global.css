@@ -1,4 +1,4 @@
-/* css/styles.css */
+/* css/global.css */
 
 /* ===== Reset básico ===== */
 * { box-sizing: border-box; }
@@ -104,6 +104,7 @@ body {
 .view { display: none; }
 .view.active { display: block; }
 
+/* container padrão das telas */
 .screen {
   position: relative;
   z-index: 2;
@@ -116,101 +117,7 @@ body {
   justify-content: center;
 }
 
-/* ===== HOME ===== */
-.hero {
-  width: min(980px, 92vw);
-  margin-top: 46px;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 28px;
-}
-
-/* ===== LOGO ===== */
-.logo {
-  width: 100%;
-  text-align: center;
-}
-
-.logo h1 {
-  margin: 0;
-  font-weight: 900;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  font-size: clamp(56px, 8vw, 96px);
-
-  text-shadow:
-    0 2px 18px rgba(0,0,0,0.65),
-    0 0 24px rgba(140, 90, 220, 0.25);
-}
-
-/* ===== MENU ===== */
-.menu-wrap {
-  width: min(420px, 92vw);
-  margin: 64px auto 0; /* <-- aqui desce o bloco de botões */
-}
-
-.menu {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 14px;
-}
-
-.menu-item {
-  position: relative;
-
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  padding: 14px 0;
-  border: 0;
-  background: transparent;
-
-  cursor: pointer;
-  user-select: none;
-
-  font-weight: 800;
-  letter-spacing: 0.10em;
-  font-size: 20px;
-  color: rgba(255,255,255,0.86);
-
-  text-shadow: 0 1px 14px rgba(0,0,0,0.55);
-  transition: transform 140ms ease, color 140ms ease, opacity 140ms ease;
-  outline: none;
-}
-
-.menu-item:hover {
-  transform: translateY(-1px);
-  color: rgba(255,255,255,0.96);
-}
-
-.menu-item.is-active,
-.menu-item:focus-visible {
-  color: rgba(255,255,255,1);
-}
-
-/* seta do item ativo */
-.menu-item.is-active::before {
-  content: "›";
-  position: absolute;
-  left: -22px;
-  font-size: 24px;
-  opacity: 0.9;
-}
-
-/* ===== Mobile ===== */
-@media (max-width: 520px) {
-  .hero { margin-top: 34px; }
-  .logo h1 { letter-spacing: 0.18em; }
-  .menu-item { font-size: 18px; }
-}
-
 /* ===== Acessibilidade ===== */
 @media (prefers-reduced-motion: reduce) {
-  .menu-item { transition: none; }
+  * { scroll-behavior: auto !important; }
 }
