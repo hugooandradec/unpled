@@ -127,6 +127,10 @@ body {
   gap: 28px;
 }
 
+.menu-wrap {
+  margin-top: 48px; /* empurra os botões para baixo */
+}
+
 /* ===== LOGO ===== */
 .logo {
   width: 100%;
