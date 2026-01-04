@@ -1,7 +1,9 @@
 // ui.js
 (function () {
+  // Se quiser que refresh mantenha a tela, mude para true depois que tudo estiver ok
+  const ENABLE_RESTORE_LAST_VIEW = false;
+
   const STORAGE_LAST_VIEW = "unpled:lastView";
-  const STORAGE_HAS_NAV = "unpled:hasNavigated";
 
   function setActive(items, idx) {
     items.forEach((el, i) => el.classList.toggle("is-active", i === idx));
@@ -30,33 +32,23 @@
   function saveLastView(viewId) {
     try { localStorage.setItem(STORAGE_LAST_VIEW, viewId); } catch {}
   }
+
   function getLastView() {
     try { return localStorage.getItem(STORAGE_LAST_VIEW); } catch { return null; }
-  }
-  function setHasNavigated() {
-    try { localStorage.setItem(STORAGE_HAS_NAV, "1"); } catch {}
-  }
-  function hasNavigatedBefore() {
-    try { return localStorage.getItem(STORAGE_HAS_NAV) === "1"; } catch { return false; }
   }
 
   function ensureBackOverlay() {
     if (document.getElementById("unpledBackOverlay")) return;
 
-    // CSS bem agressivo pra não ficar por baixo de nada
     const style = document.createElement("style");
-    style.id = "unpledBackOverlayStyle";
     style.textContent = `
       #unpledBackOverlay{
         position: fixed;
         left: 14px;
-        top: 74px; /* abaixo da topbar */
-        z-index: 9999 !important;
+        top: 74px;
+        z-index: 999999;
         display: none;
-        pointer-events: auto !important;
-      }
-      #unpledBackOverlay *{
-        pointer-events: auto !important;
+        pointer-events: auto;
       }
       #unpledBackOverlay button{
         border: 1px solid rgba(255,255,255,0.18);
@@ -73,9 +65,6 @@
         -webkit-backdrop-filter: blur(10px);
         box-shadow: 0 18px 40px rgba(0,0,0,0.45);
       }
-      #unpledBackOverlay button:active{
-        transform: translateY(1px);
-      }
     `;
     document.head.appendChild(style);
 
@@ -91,11 +80,10 @@
     });
   }
 
-  function toggleBackOverlay(currentViewId) {
+  function toggleBackOverlay(viewId) {
     const overlay = document.getElementById("unpledBackOverlay");
     if (!overlay) return;
-    overlay.style.display =
-      currentViewId && currentViewId !== "view-home" ? "block" : "none";
+    overlay.style.display = (viewId && viewId !== "view-home") ? "block" : "none";
   }
 
   function showView(viewId) {
@@ -105,13 +93,9 @@
     const target = document.getElementById(viewId);
     if (target) target.classList.add("active");
 
-    // salva a tela atual (pra refresh manter depois que você navegar)
-    if (viewId) saveLastView(viewId);
-
-    // botão voltar interno
     toggleBackOverlay(viewId);
+    saveLastView(viewId);
 
-    // scroll pro topo quando trocar de tela
     const main = document.querySelector(".screen");
     if (main) main.scrollTo({ top: 0, behavior: "auto" });
   }
@@ -184,9 +168,6 @@
   }
 
   function triggerAction(action) {
-    // a partir daqui, o usuário “navegou” pelo app
-    setHasNavigated();
-
     switch (action) {
       case "play":
         showView("view-play");
@@ -207,30 +188,20 @@
     }
   }
 
-  function restoreLastView() {
-    // Se o usuário nunca navegou (ou veio com um lastView velho), começa SEMPRE na home
-    if (!hasNavigatedBefore()) {
-      showView("view-home");
-      return;
-    }
-
-    const last = getLastView();
-    if (!last) {
-      showView("view-home");
-      return;
-    }
-
-    const exists = document.getElementById(last);
-    if (exists) {
-      showView(last);
-
-      if (last === "view-collection") {
-        window.dispatchEvent(new CustomEvent("unpled:open-collection"));
-      }
-      return;
-    }
-
+  function bootView() {
+    // SEMPRE começa na HOME (pra nunca “travar”)
     showView("view-home");
+
+    // Se você quiser restaurar depois, liga ENABLE_RESTORE_LAST_VIEW
+    if (ENABLE_RESTORE_LAST_VIEW) {
+      const last = getLastView();
+      if (last && document.getElementById(last)) {
+        showView(last);
+        if (last === "view-collection") {
+          window.dispatchEvent(new CustomEvent("unpled:open-collection"));
+        }
+      }
+    }
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -241,7 +212,6 @@
     window.addEventListener("offline", updateNetStatus);
 
     initMenu();
-
-    restoreLastView();
+    bootView();
   });
 })();
