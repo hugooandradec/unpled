@@ -1,232 +1,245 @@
 /* css/collection.css */
 
-/* Desce a tela da coleção como um bloco (não só o conteúdo) */
-#view-collection {
+/* Força a view da coleção a começar do topo (mesmo se .view for flex/center no global) */
+#view-collection{
+  display: flex !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+
   width: 100%;
-  padding-top: 46px; /* aumenta/diminui aqui até ficar perfeito */
+  padding-top: 72px; /* <<< AQUI você regula o "descer" */
+  padding-bottom: 40px;
 }
 
-.collection-wrap {
+/* Wrapper */
+.collection-wrap{
   width: min(980px, 92vw);
   margin: 0 auto;
   text-align: center;
-  padding-top: 0px;
 }
 
-/* Título maior e com bastante respiro */
-.collection-title {
-  margin: 0 0 26px;           /* espaço REAL abaixo */
+/* Topo (botão voltar + título central) */
+.collection-top{
+  position: relative;
+  margin-bottom: 18px;
+}
+
+.collection-back-btn{
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Título */
+.collection-title{
+  margin: 0;
   font-weight: 900;
-  letter-spacing: 0.32em;
+  letter-spacing: .32em;
   text-transform: uppercase;
-  font-size: 42px;            /* mais forte */
-  opacity: 0.96;
-  text-shadow: 0 2px 22px rgba(0,0,0,0.70);
+  font-size: 44px;
+  opacity: .96;
+  text-shadow: 0 2px 22px rgba(0,0,0,.70);
 }
 
-/* Linha dos tipos (mais distante do título) */
-.collection-types {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-
-  margin: 0 0 18px;           /* mais espaço antes do sub */
+/* Linha dos tipos */
+.collection-types{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  justify-content:center;
+  margin: 18px 0 18px;
 }
 
-/* Subtexto (Base — X carta(s)) maior */
-.collection-sub {
-  margin: 0 0 18px;
-  font-size: 16px;            /* maior */
-  font-weight: 800;
-  opacity: 0.85;
+/* Subtexto (Base — X carta(s)) */
+.collection-sub{
+  margin:0 0 16px;
+  font-size:16px;
+  font-weight:800;
+  opacity:.85;
 }
 
 /* Filtro de naipe */
-.suit-filter {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 0 0 26px;           /* mais espaço antes do grid */
+.suit-filter{
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin:0 0 26px;
 }
 
-/* Pílulas */
-.pill-btn {
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(15, 18, 30, 0.35);
-  color: rgba(255,255,255,0.90);
-  padding: 10px 13px;
-  border-radius: 999px;
-  cursor: pointer;
-  user-select: none;
+/* Botões pill */
+.pill-btn{
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(15,18,30,.35);
+  color:rgba(255,255,255,.90);
+  padding:10px 13px;
+  border-radius:999px;
+  cursor:pointer;
+  user-select:none;
 
-  font-weight: 900;
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  font-size: 11px;
+  font-weight:900;
+  letter-spacing:.10em;
+  text-transform:uppercase;
+  font-size:11px;
 
-  box-shadow: 0 14px 34px rgba(0,0,0,0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  box-shadow:0 14px 34px rgba(0,0,0,.25);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
 
-  transition: transform 140ms ease, border-color 140ms ease, opacity 140ms ease;
+  transition:transform 140ms ease, border-color 140ms ease, opacity 140ms ease;
 }
 
-.pill-btn.small {
-  padding: 8px 11px;
-  font-size: 10px;
-}
+.pill-btn.small{ padding:8px 11px; font-size:10px; }
+.pill-btn:hover{ transform:translateY(-1px); border-color:rgba(167,139,250,.38); }
+.pill-btn.active{ border-color:rgba(167,139,250,.62); background:rgba(167,139,250,.20); }
 
-.pill-btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(167, 139, 250, 0.38);
-}
-
-.pill-btn.active {
-  border-color: rgba(167, 139, 250, 0.62);
-  background: rgba(167, 139, 250, 0.20);
-}
-
-/* ===== GRID: 4 cartas por fileira ===== */
-.cards-grid {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: start;
-  justify-items: stretch;
+/* GRID 4 colunas */
+.cards-grid{
+  display:grid;
+  gap:18px;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  align-items:start;
+  justify-items:stretch;
 }
 
 /* Carta */
-.card-mini {
-  border-radius: 18px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.10);
-  background: rgba(12, 14, 22, 0.40);
-  box-shadow: 0 18px 40px rgba(0,0,0,0.35);
-  cursor: pointer;
-  transition: transform 140ms ease, border-color 140ms ease, opacity 140ms ease;
+.card-mini{
+  position: relative;
+  border-radius:18px;
+  overflow:hidden;
+  background:rgba(12,14,22,.40);
+  box-shadow:0 18px 40px rgba(0,0,0,.35);
+  cursor:pointer;
+  transition:transform 140ms ease, filter 140ms ease;
+}
+.card-mini:hover{
+  transform:translateY(-2px);
+  filter:brightness(1.05);
 }
 
-.card-mini:hover {
-  transform: translateY(-2px);
-  border-color: rgba(167, 139, 250, 0.35);
-}
-
-/* Área de arte — agora cabe certinho (sem cortar) */
-.card-mini .art {
-  width: 100%;
-
-  /* suas cartas são “em pé” -> proporção 3:4 */
+/* Área da arte (carta em pé 3/4) */
+.card-mini .art{
+  width:100%;
   aspect-ratio: 3 / 4;
-
-  background: rgba(255,255,255,0.06);
-  display: grid;
-  place-items: center;
-
-  padding: 10px;
+  background:rgba(255,255,255,.06);
+  display:grid;
+  place-items:center;
+  padding:10px;
+}
+.card-mini .art img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  display:block;
 }
 
-.card-mini .art img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;        /* não corta */
-  display: block;
+/* Some texto (nome/meta) */
+.card-mini .info{ display:none; }
+
+/* ===== BORDA SÓ PARA CARTAS BASE ===== */
+.card-mini[data-tipo="Base"]::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:18px;
+  pointer-events:none;
+
+  border:2px solid rgba(255,255,255,0.22);
+  box-shadow:
+    inset 0 0 0 2px rgba(0,0,0,0.25),
+    inset 0 0 30px rgba(255,255,255,0.06);
+}
+.card-mini[data-tipo="Base"]::after{
+  content:"";
+  position:absolute;
+  inset:-1px;
+  border-radius:18px;
+  pointer-events:none;
+  background: radial-gradient(circle at 50% 10%, rgba(167,139,250,0.20), transparent 55%);
+  opacity:0.9;
 }
 
-/* Esconde nome/meta (pra não aparecer) */
-.card-mini .info { display: none; }
-
-/* Mensagem de vazio maior */
-.collection-empty {
-  grid-column: 1 / -1;
-  padding: 20px 0;
-  opacity: 0.88;
-  font-size: 16px;            /* maior */
-  font-weight: 800;
+/* Empty state */
+.collection-empty{
+  grid-column:1 / -1;
+  padding:20px 0;
+  opacity:.88;
+  font-size:16px;
+  font-weight:800;
 }
 
-/* ===== MODAL FULLSCREEN (à prova de corte) ===== */
-.card-modal {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  display: none;
-  background: rgba(0,0,0,0.78);
+/* ===== MODAL FULLSCREEN (sem corte) ===== */
+.card-modal{
+  position:fixed;
+  inset:0;
+  z-index:80;
+  display:none;
+  background:rgba(0,0,0,.78);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
+.card-modal.show{ display:block; }
 
-.card-modal.show { display: block; }
-
-.card-modal-inner {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  padding: 24px;
+.card-modal-inner{
+  position:absolute;
+  inset:0;
+  display:grid;
+  place-items:center;
+  padding:22px;
 }
 
 /* Botão fechar maior */
-.card-modal-close {
-  position: fixed;
-  top: 74px;                 /* abaixo da topbar */
-  right: 18px;
+.card-modal-close{
+  position:fixed;
+  top:74px;
+  right:18px;
 
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(15, 18, 30, 0.45);
-  color: rgba(255,255,255,0.92);
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(15,18,30,.45);
+  color:rgba(255,255,255,.92);
 
-  padding: 12px 18px;
-  border-radius: 999px;
+  padding:13px 20px;
+  border-radius:999px;
+  cursor:pointer;
 
-  cursor: pointer;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-size: 12px;
+  font-weight:900;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  font-size:12px;
 }
 
-/* Container SEM altura fixa e SEM padding que “come” a carta */
-.card-modal-figure {
-  width: auto;
-  height: auto;
+/* Container do modal sem aspect-ratio forçado */
+.card-modal-figure{
+  display:grid;
+  place-items:center;
 
-  max-width: min(92vw, 860px);
-  max-height: calc(100vh - 140px);
+  max-width:min(92vw, 760px);
+  max-height:calc(100vh - 150px);
 
-  border-radius: 18px;
+  padding:14px;
+  border-radius:18px;
 
-  border: 1px solid rgba(255,255,255,0.14);
-  background: rgba(12, 14, 22, 0.55);
-  box-shadow: 0 28px 90px rgba(0,0,0,0.65);
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(12,14,22,.55);
+  box-shadow:0 28px 90px rgba(0,0,0,.65);
 
-  /* o pulo do gato: não deixa o container cortar */
-  overflow: visible;
-
-  display: grid;
-  place-items: center;
-  padding: 0;                /* remove padding que ajudava a cortar */
+  overflow:visible;
 }
-
-/* A IMAGEM é quem manda no tamanho, dentro dos limites */
-.card-modal-figure img {
-  max-width: 100%;
-  max-height: calc(100vh - 160px);
-  width: auto;
-  height: auto;
-
-  object-fit: contain;
-  display: block;
+.card-modal-figure img{
+  max-width:100%;
+  max-height:calc(100vh - 190px);
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  display:block;
 }
 
 /* Responsivo */
-@media (max-width: 900px) {
-  .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .collection-title { font-size: 32px; }
+@media (max-width: 900px){
+  .cards-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .collection-title{ font-size: 34px; }
 }
-
-@media (max-width: 520px) {
-  .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .collection-title { font-size: 26px; letter-spacing: 0.24em; }
+@media (max-width: 520px){
+  .collection-title{ font-size: 28px; letter-spacing: .24em; }
 }
