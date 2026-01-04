@@ -30,7 +30,7 @@ body {
   z-index: 0;
 }
 
-/* ===== TOPBAR (agora fica certo, alinhado) ===== */
+/* ===== TOPBAR ===== */
 .topbar {
   position: fixed;
   top: 0;
@@ -46,7 +46,6 @@ body {
 
   z-index: 5;
 
-  /* vidro escuro */
   background: rgba(10, 12, 20, 0.30);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -101,7 +100,7 @@ body {
 .dot.online { background: #22c55e; box-shadow: 0 0 14px rgba(34,197,94,0.35); }
 .dot.offline { background: #ef4444; box-shadow: 0 0 14px rgba(239,68,68,0.25); }
 
-/* ===== Views / tela ===== */
+/* ===== Views ===== */
 .view { display: none; }
 .view.active { display: block; }
 
@@ -110,8 +109,6 @@ body {
   z-index: 2;
   height: 100%;
   padding: 24px;
-
-  /* espaço da topbar */
   padding-top: 58px;
 
   display: flex;
@@ -122,56 +119,55 @@ body {
 /* ===== HOME ===== */
 .hero {
   width: min(980px, 92vw);
-
-  /* título mais pra cima */
   margin-top: 46px;
 
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 18px;
+  align-items: center;
+  gap: 28px;
 }
 
+/* ===== LOGO ===== */
 .logo {
-  text-align: left;
+  width: 100%;
+  text-align: center;
 }
 
 .logo h1 {
   margin: 0;
   font-weight: 900;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  font-size: clamp(42px, 6vw, 78px);
+  font-size: clamp(56px, 8vw, 96px);
 
   text-shadow:
     0 2px 18px rgba(0,0,0,0.65),
     0 0 24px rgba(140, 90, 220, 0.25);
 }
 
-/* ===== MENU (lado esquerdo, sem fundo) ===== */
+/* ===== MENU ===== */
 .menu-wrap {
   width: min(420px, 92vw);
-  padding: 0;              /* sem card */
-  background: transparent;  /* sem fundo */
-  border: 0;
-  box-shadow: none;
+  margin: 0 auto;
 }
 
 .menu {
   margin: 0;
   padding: 0;
-  list-style: none; /* tira as bolinhas */
+  list-style: none;
   display: grid;
-  gap: 10px;
+  gap: 14px;
 }
 
-/* botão estilo “Steam text menu” */
 .menu-item {
-  width: auto;
-  display: inline-flex;
+  position: relative;
+
+  width: 100%;
+  display: flex;
+  justify-content: center;
   align-items: center;
 
-  padding: 8px 0;
+  padding: 14px 0;
   border: 0;
   background: transparent;
 
@@ -179,8 +175,8 @@ body {
   user-select: none;
 
   font-weight: 800;
-  letter-spacing: 0.06em;
-  font-size: 16px;
+  letter-spacing: 0.10em;
+  font-size: 20px;
   color: rgba(255,255,255,0.86);
 
   text-shadow: 0 1px 14px rgba(0,0,0,0.55);
@@ -189,23 +185,21 @@ body {
 }
 
 .menu-item:hover {
-  transform: translateX(2px);
+  transform: translateY(-1px);
   color: rgba(255,255,255,0.96);
 }
 
-/* selecionado/ativo */
 .menu-item.is-active,
 .menu-item:focus-visible {
-  color: rgba(255,255,255,0.98);
+  color: rgba(255,255,255,1);
 }
 
-/* setinha do item ativo */
+/* seta do item ativo */
 .menu-item.is-active::before {
   content: "›";
-  display: inline-block;
-  margin-right: 10px;
-  font-size: 22px;
-  transform: translateY(-1px);
+  position: absolute;
+  left: -22px;
+  font-size: 24px;
   opacity: 0.9;
 }
 
@@ -213,7 +207,7 @@ body {
 @media (max-width: 520px) {
   .hero { margin-top: 34px; }
   .logo h1 { letter-spacing: 0.18em; }
-  .menu-item { font-size: 15px; }
+  .menu-item { font-size: 18px; }
 }
 
 /* ===== Acessibilidade ===== */
