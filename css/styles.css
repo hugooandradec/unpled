@@ -297,3 +297,23 @@ h2{ font-size: 20px; }
   color: rgba(154,163,178,.92);
   font-size: 12px;
   text-shadow: 0 12px 30px
+
+/* ===== menu com ícone ===== */
+.menu-with-icon{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.menu-with-icon img{
+  width: 72px;
+  height: auto;
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,.65));
+  transition: transform .2s ease, filter .2s ease;
+}
+
+.menu-with-icon:hover img{
+  transform: translateY(-2px) scale(1.04);
+  filter: drop-shadow(0 16px 36px rgba(0,0,0,.85));
+}
