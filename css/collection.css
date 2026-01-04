@@ -2,37 +2,47 @@
 
 .collection-wrap {
   width: min(980px, 92vw);
-  margin: 24px auto 0;
+  margin: 18px auto 0;
   text-align: center;
 }
 
-.collection-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 10px;
-}
-
+/* Título grande e central no topo */
 .collection-title {
-  margin: 0;
+  margin: 10px 0 16px;
   font-weight: 900;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  font-size: 18px;
-  opacity: 0.92;
-  text-shadow: 0 1px 14px rgba(0,0,0,0.6);
+  font-size: 26px;            /* maior */
+  opacity: 0.95;
+  text-shadow: 0 2px 18px rgba(0,0,0,0.65);
 }
 
-/* ===== Botões tipo de coleção ===== */
+/* Linha dos tipos */
 .collection-types {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
-  margin: 10px 0 14px;
+  margin: 0 0 10px;
 }
 
+/* Subtexto */
+.collection-sub {
+  margin: 0 0 12px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* Filtro de naipe */
+.suit-filter {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+}
+
+/* Pílulas */
 .pill-btn {
   border: 1px solid rgba(255,255,255,0.12);
   background: rgba(15, 18, 30, 0.35);
@@ -69,30 +79,16 @@
   background: rgba(167, 139, 250, 0.18);
 }
 
-/* ===== Subheader ===== */
-.collection-sub {
-  margin: 0 0 14px;
-  font-size: 12px;
-  opacity: 0.75;
-}
-
-/* ===== Filtro de naipe ===== */
-.suit-filter {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin: 0 0 16px;
-}
-
-/* ===== Grid de cartas ===== */
+/* ===== GRID: 4 cartas por fileira ===== */
 .cards-grid {
   display: grid;
   gap: 14px;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* 4 colunas */
   align-items: stretch;
+  justify-items: stretch;
 }
 
+/* Carta pequena */
 .card-mini {
   border-radius: 16px;
   overflow: hidden;
@@ -108,16 +104,22 @@
   border-color: rgba(167, 139, 250, 0.35);
 }
 
+/* Área de arte (mini) */
 .card-mini .art {
   height: 110px;
+  background: rgba(255,255,255,0.06);
   display: grid;
   place-items: center;
-  background: rgba(255,255,255,0.06);
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  opacity: 0.9;
 }
 
+.card-mini .art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Info */
 .card-mini .info {
   padding: 10px 10px 12px;
 }
@@ -128,12 +130,13 @@
   font-size: 12px;
   letter-spacing: 0.10em;
   text-transform: uppercase;
+  opacity: 0.95;
 }
 
 .card-mini .meta {
   margin: 6px 0 0;
   font-size: 11px;
-  opacity: 0.75;
+  opacity: 0.72;
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -146,17 +149,69 @@
   font-size: 13px;
 }
 
-/* ===== Botão voltar aos tipos ===== */
-.collection-back {
-  margin-top: 16px;
+/* ===== MODAL FULLSCREEN ===== */
+.card-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+  background: rgba(0,0,0,0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.card-modal.show {
+  display: block;
+}
+
+.card-modal-inner {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.card-modal-close {
+  position: absolute;
+  top: 72px; /* abaixo da topbar */
+  right: 18px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(15, 18, 30, 0.35);
+  color: rgba(255,255,255,0.88);
+  padding: 10px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.card-modal-figure {
+  width: min(560px, 92vw);
+  aspect-ratio: 3 / 4;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(12, 14, 22, 0.55);
+  box-shadow: 0 28px 90px rgba(0,0,0,0.65);
+}
+
+.card-modal-figure img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 /* Responsivo */
-@media (max-width: 980px) {
-  .cards-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) {
+  .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .collection-title { font-size: 22px; }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 520px) {
   .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .collection-top { flex-direction: column; align-items: center; }
+  .collection-title { font-size: 20px; letter-spacing: 0.22em; }
 }
