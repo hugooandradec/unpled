@@ -127,12 +127,6 @@ body {
   gap: 28px;
 }
 
-.menu-wrap {
-  width: min(420px, 92vw);
-  margin: 64px auto 0;  /* <-- aqui desce o bloco (top) */
-}
-
-
 /* ===== LOGO ===== */
 .logo {
   width: 100%;
@@ -154,7 +148,7 @@ body {
 /* ===== MENU ===== */
 .menu-wrap {
   width: min(420px, 92vw);
-  margin: 0 auto;
+  margin: 64px auto 0; /* <-- aqui desce o bloco de botões */
 }
 
 .menu {
