@@ -10,48 +10,50 @@ import {
 let state = loadState() || {};
 if (typeof state.coins !== "number") state.coins = 0;
 
+// =========================
+// ESTADO DO JOGO (TEMP)
+// =========================
+let currentPack = [];
+let handIndex = 0;
+
 function init() {
-  // Inicializa UI inteira
   bootUI();
 
   updateCoins(state.coins);
   setOnlineStatus();
 
-  // Service Worker
+  // gera um pack inicial só pra alimentar a mão
+  currentPack = openPack();
+  handIndex = 0;
+
+  window.dispatchEvent(
+    new CustomEvent("unpled:new-pack", { detail: { cards: currentPack } })
+  );
+
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   }
 }
 
 // =========================
-// GACHA – ABRIR PACK
+// VIRAR PRÓXIMA CARTA
 // =========================
 document.addEventListener("click", (e) => {
-  const btn = e.target.closest("#btnOpenPack");
+  const btn = e.target.closest("#btnFlipCard");
   if (!btn) return;
 
-  const PACK_COST = 10;
+  if (handIndex >= 5) return;
 
-  if (state.coins < PACK_COST) {
-    alert(`Sem moedas 😭 Precisa de ${PACK_COST}.`);
-    return;
-  }
+  const card = currentPack[handIndex];
+  if (!card) return;
 
-  // paga o pack
-  state.coins -= PACK_COST;
-  saveState(state);
-  updateCoins(state.coins);
-
-  // gera cartas
-  const cards = openPack();
-
-  // salva pack pendente
-  localStorage.setItem("unpled:pendingPack", JSON.stringify(cards));
-
-  // avisa UI
   window.dispatchEvent(
-    new CustomEvent("unpled:pack-opened", { detail: { cards } })
+    new CustomEvent("unpled:flip-card", {
+      detail: { card, index: handIndex }
+    })
   );
+
+  handIndex++;
 });
 
 document.addEventListener("DOMContentLoaded", init);

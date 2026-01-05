@@ -1,9 +1,16 @@
 // js/ui.js (ES Module)
 
+// =========================
+// HELPERS
+// =========================
 function normalizeViewId(view) {
   if (!view) return "view-home";
   if (view.startsWith("view-")) return view;
   return `view-${view}`;
+}
+
+function getCardLabel(card) {
+  return `${card.rank}${card.suitSymbol}`;
 }
 
 // =========================
@@ -26,70 +33,74 @@ export function updateCoins(coins) {
 }
 
 // =========================
-// BACK OVERLAY + CSS
+// BACK + CSS
 // =========================
-function ensureBackOverlay() {
-  if (document.getElementById("unpledBackOverlay")) return;
+function ensureStyles() {
+  if (document.getElementById("handStyles")) return;
 
   const style = document.createElement("style");
+  style.id = "handStyles";
   style.textContent = `
-    #view-home{
+    .play-wrap{
       width:min(980px,92vw);
       margin:0 auto;
       padding:90px 0 36px;
-    }
-
-    .home-title{
-      margin:0 0 34px;
-      font-weight:900;
-      letter-spacing:.28em;
-      text-transform:uppercase;
-      font-size:46px;
       text-align:center;
-      opacity:.96;
     }
 
-    .home-menu{
+    .play-title{
+      margin-bottom:24px;
+      font-weight:900;
+      letter-spacing:.22em;
+      font-size:28px;
+      opacity:.95;
+    }
+
+    .hand{
+      display:flex;
+      justify-content:center;
+      gap:14px;
+      margin-bottom:18px;
+    }
+
+    .card-slot{
+      width:84px;
+      height:120px;
+      border-radius:14px;
+      background:rgba(20,22,26,.55);
+      border:1px solid rgba(255,255,255,.14);
       display:flex;
       flex-direction:column;
-      gap:16px;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      box-shadow:0 14px 30px rgba(0,0,0,.4);
+      backdrop-filter:blur(10px);
+      transition:transform .25s ease, opacity .25s ease;
     }
 
-    .menu-item{
-      padding:14px 16px;
-      font-size:13px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(20,22,26,.45);
-      color:#fff;
-      font-weight:800;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      cursor:pointer;
-      backdrop-filter:blur(12px);
+    .card-slot.empty{
+      opacity:.25;
     }
 
-    .menu-item.is-active{
-      border-color:rgba(255,255,255,.3);
+    .card-rank{
+      font-size:28px;
+      line-height:1;
+    }
+
+    .card-suit{
+      font-size:20px;
+      opacity:.9;
+      margin-top:4px;
+    }
+
+    .hand-info{
+      margin:10px 0 18px;
+      font-size:14px;
+      opacity:.85;
     }
   `;
   document.head.appendChild(style);
-
-  const wrap = document.createElement("div");
-  wrap.id = "unpledBackOverlay";
-  wrap.innerHTML = `<button id="unpledBackBtn">Voltar</button>`;
-  wrap.style.cssText = `
-    position:fixed;left:14px;top:74px;display:none;z-index:9999;
-  `;
-  document.body.appendChild(wrap);
-
-  wrap.querySelector("#unpledBackBtn").onclick = () => showView("view-home");
-}
-
-function toggleBackOverlay(viewId) {
-  const ov = document.getElementById("unpledBackOverlay");
-  if (!ov) return;
-  ov.style.display = viewId !== "view-home" ? "block" : "none";
 }
 
 // =========================
@@ -99,135 +110,79 @@ export function showView(view) {
   const id = normalizeViewId(view);
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
-  toggleBackOverlay(id);
 }
 
 // =========================
-// HOME
+// HOME (SIMPLIFICADO)
 // =========================
 export function renderHomeView() {
-  ensureBackOverlay();
   const root = document.getElementById("view-home");
   if (!root || root.dataset.ready) return;
 
   root.innerHTML = `
     <h1 class="home-title">UNPLED</h1>
     <div class="home-menu">
-      <button class="menu-item is-active" data-go="play">Jogar</button>
-      <button class="menu-item" data-go="collection">Coleção</button>
-      <button class="menu-item" data-go="settings">Configurações</button>
+      <button class="menu-item" id="goPlay">Jogar</button>
     </div>
   `;
 
-  root.querySelectorAll(".menu-item").forEach(btn => {
-    btn.onclick = () => {
-      const go = btn.dataset.go;
-      if (go === "play") showView("view-play");
-      if (go === "collection") {
-        showView("view-collection");
-        window.dispatchEvent(new CustomEvent("unpled:open-collection"));
-      }
-      if (go === "settings") showView("view-settings");
-    };
-  });
-
+  root.querySelector("#goPlay").onclick = () => showView("view-play");
   root.dataset.ready = "1";
 }
 
 // =========================
-// JOGAR – GACHA
+// JOGAR – UI DA MÃO
 // =========================
-function getPendingPack() {
-  try {
-    return JSON.parse(localStorage.getItem("unpled:pendingPack") || "null");
-  } catch {
-    return null;
-  }
-}
-
-function getCollection() {
-  try {
-    return JSON.parse(localStorage.getItem("unpled:collection") || "[]");
-  } catch {
-    return [];
-  }
-}
-
-function saveCollection(list) {
-  localStorage.setItem("unpled:collection", JSON.stringify(list));
-  window.dispatchEvent(new CustomEvent("unpled:collection-updated"));
-}
-
 export function renderPlayView() {
+  ensureStyles();
+
   const root = document.getElementById("view-play");
   if (!root) return;
 
   root.innerHTML = `
-    <div style="padding:90px 0;text-align:center">
-      <h1>JOGAR</h1>
-      <button id="btnOpenPack">Abrir Pack (10)</button>
-      <button id="btnSavePack">Salvar na coleção</button>
-      <div id="packResult"></div>
+    <div class="play-wrap">
+      <h1 class="play-title">JOGAR</h1>
+
+      <div class="hand" id="handSlots">
+        ${Array.from({ length: 5 }).map(() =>
+          `<div class="card-slot empty"></div>`
+        ).join("")}
+      </div>
+
+      <div class="hand-info">
+        <div id="lastCard">Nenhuma carta ainda</div>
+      </div>
+
+      <button id="btnFlipCard" class="pill-btn">
+        Virar próxima carta
+      </button>
     </div>
   `;
 
-  const renderPack = (cards) => {
-    const el = document.getElementById("packResult");
-    if (!cards) {
-      el.innerHTML = "";
-      return;
-    }
-    el.innerHTML = cards.map(c =>
-      `<div>${c.rank}${c.suitSymbol} – ${c.name || ""}</div>`
-    ).join("");
-  };
+  const slots = root.querySelectorAll(".card-slot");
 
-  renderPack(getPendingPack());
+  // ouvir evento de virar carta
+  window.addEventListener("unpled:flip-card", (e) => {
+    const { card, index } = e.detail;
+    const slot = slots[index];
+    if (!slot) return;
 
-  root.querySelector("#btnSavePack").onclick = () => {
-    const pack = getPendingPack();
-    if (!pack) return;
-    saveCollection(getCollection().concat(pack));
-    localStorage.removeItem("unpled:pendingPack");
-    renderPack(null);
-  };
+    slot.classList.remove("empty");
+    slot.innerHTML = `
+      <div class="card-rank">${card.rank}</div>
+      <div class="card-suit">${card.suitSymbol}</div>
+    `;
 
-  window.addEventListener("unpled:pack-opened", e => {
-    renderPack(e.detail.cards);
-  }, { once: true });
-}
-
-// =========================
-// SETTINGS (placeholder)
-// =========================
-export function renderSettingsView() {
-  const root = document.getElementById("view-settings");
-  if (!root) return;
-  root.innerHTML = `<div style="padding:90px;text-align:center">Em breve…</div>`;
-}
-
-// =========================
-// COLEÇÃO (delegada)
-// =========================
-import { renderCollectionView as renderCollectionModule } from "./collection.js";
-export function renderCollectionView() {
-  renderCollectionModule();
+    document.getElementById("lastCard").textContent =
+      `Última carta: ${getCardLabel(card)}`;
+  });
 }
 
 // =========================
 // BOOT
 // =========================
 export function bootUI() {
-  ensureBackOverlay();
-  setOnlineStatus();
-
   renderHomeView();
   renderPlayView();
-  renderCollectionView();
-  renderSettingsView();
-
   showView("view-home");
-
-  window.addEventListener("online", setOnlineStatus);
-  window.addEventListener("offline", setOnlineStatus);
 }
