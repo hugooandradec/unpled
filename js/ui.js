@@ -20,11 +20,9 @@ function shuffle(arr) {
 }
 
 // =========================
-// ASSET URLS (mais robusto)
+// ASSET URLS (robusto)
 // =========================
-// Usa o baseURI do index.html (funciona em /unpled/ e local)
 function assetUrl(pathFromRoot) {
-  // pathFromRoot exemplo: "assets/cards/_frame/base_border.png"
   return new URL(pathFromRoot, document.baseURI).toString();
 }
 
@@ -68,13 +66,11 @@ export function showView(view) {
   const id = normalizeViewId(view);
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
-
-  // controla botão voltar global na coleção
   updateGlobalBackVisibility();
 }
 
 // =========================
-// GLOBAL BACK (pra Coleção sem mexer no collection.js)
+// GLOBAL BACK (Coleção)
 // =========================
 function ensureGlobalBack() {
   if (document.getElementById("uGlobalBack")) return;
@@ -116,13 +112,11 @@ function updateGlobalBackVisibility() {
 
   const col = document.getElementById("view-collection");
   const isCollectionActive = !!(col && col.classList.contains("active"));
-
-  // mostra só na coleção
   btn.style.display = isCollectionActive ? "block" : "none";
 }
 
 // =========================
-// STYLES (uma vez)
+// STYLES
 // =========================
 function ensureUIStyles() {
   if (document.getElementById("unpled-ui-styles")) return;
@@ -214,9 +208,8 @@ function ensureUIStyles() {
       perspective:900px;
       user-select:none;
       flex:0 0 auto;
-      /* debug leve: se por algum motivo sumir, pelo menos tem "caixa" */
-      background:rgba(255,255,255,.02);
       border-radius:14px;
+      z-index:3;
     }
     @media (max-width: 520px){
       .u-card{ width:92px; height:132px; }
@@ -274,11 +267,15 @@ function ensureUIStyles() {
       height:100%;
       display:block;
     }
-    .u-art{ object-fit:cover; }
+    .u-art{
+      object-fit:cover;
+      z-index:1;
+    }
     .u-frame{
       object-fit:contain;
       pointer-events:none;
       transform:scale(1.01);
+      z-index:2;
     }
 
     .u-fallback{
@@ -292,6 +289,7 @@ function ensureUIStyles() {
       color:#111;
       background:rgba(255,255,255,.92);
       letter-spacing:.08em;
+      z-index:5;
     }
 
     .u-controls{
@@ -332,7 +330,7 @@ function ensureUIStyles() {
 }
 
 // =========================
-// HOME (não sobrescreve se você já tem)
+// HOME
 // =========================
 export function renderHomeView() {
   const root = document.getElementById("view-home");
@@ -364,12 +362,11 @@ export function renderHomeView() {
 // COLEÇÃO
 // =========================
 export function renderCollectionView() {
-  // o botão voltar global vai aparecer automaticamente quando essa view estiver active
   renderCollectionModule();
 }
 
 // =========================
-// SETTINGS (placeholder)
+// SETTINGS
 // =========================
 export function renderSettingsView() {
   const root = document.getElementById("view-settings");
@@ -452,9 +449,18 @@ export function renderPlayView() {
       img.src = PATH_FRAME;
     });
 
-    // debug (pra você ver no console se o caminho tá certo)
-    // console.log("FRAME:", PATH_FRAME);
-    // console.log("EX:", hand[0]?.img);
+    // 🔎 LOGA os caminhos reais (pra você testar abrindo no browser)
+    console.log("FRAME:", PATH_FRAME);
+    console.log("CARTAS:", hand.map(h => h.img));
+  }
+
+  function ensureFallback(front, card) {
+    // se já tem fallback, não duplica
+    if (front.querySelector(".u-fallback")) return;
+    const fb = document.createElement("div");
+    fb.className = "u-fallback";
+    fb.textContent = `${card.rank}♠`;
+    front.appendChild(fb);
   }
 
   function reveal(i) {
@@ -465,11 +471,23 @@ export function renderPlayView() {
     const art = el.querySelector(".u-art");
     const front = el.querySelector(".u-front");
 
+    // fallback “garantido” se a imagem não carregar logo
+    const t = setTimeout(() => {
+      // se não carregou, mostra fallback
+      if (!art.complete || art.naturalWidth === 0) {
+        ensureFallback(front, card);
+      }
+    }, 600);
+
     art.onerror = () => {
-      const fb = document.createElement("div");
-      fb.className = "u-fallback";
-      fb.textContent = `${card.rank}♠`;
-      front.appendChild(fb);
+      clearTimeout(t);
+      ensureFallback(front, card);
+    };
+
+    art.onload = () => {
+      clearTimeout(t);
+      // se já tinha fallback por timing, remove
+      front.querySelectorAll(".u-fallback").forEach(x => x.remove());
     };
 
     art.src = card.img;
