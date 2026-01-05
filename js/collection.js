@@ -3,16 +3,49 @@
 const TYPES = ["Base", "Incomum", "Rara", "Épica", "Lendária"];
 const SUITS = ["Todos", "Espadas", "Ouro", "Paus", "Copas"];
 
-const CARDS = [
-  { id: "sp-a", nome: "Ás de Espadas", tipo: "Base", naipe: "Espadas", valor: "A", img: "assets/cards/base/espadas/A_espadas.png" },
-  { id: "sp-2", nome: "2 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "2", img: "assets/cards/base/espadas/2_espadas.png" },
-  { id: "sp-3", nome: "3 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "3", img: "assets/cards/base/espadas/3_espadas.png" },
-  { id: "sp-4", nome: "4 de Espadas",  tipo: "Base", naipe: "Espadas", valor: "4", img: "assets/cards/base/espadas/4_espadas.png" }
-];
-
 let state = { type: "Base", suit: "Todos" };
 
 function qs(sel) { return document.querySelector(sel); }
+
+// ✅ Igual ao ui.js: resolve caminho usando baseURI (funciona no /unpled/)
+function assetUrl(pathFromRoot) {
+  return new URL(pathFromRoot, document.baseURI).toString();
+}
+
+const CARDS = [
+  {
+    id: "sp-a",
+    nome: "Ás de Espadas",
+    tipo: "Base",
+    naipe: "Espadas",
+    valor: "A",
+    img: assetUrl("assets/cards/base/espadas/A_espadas.png")
+  },
+  {
+    id: "sp-2",
+    nome: "2 de Espadas",
+    tipo: "Base",
+    naipe: "Espadas",
+    valor: "2",
+    img: assetUrl("assets/cards/base/espadas/2_espadas.png")
+  },
+  {
+    id: "sp-3",
+    nome: "3 de Espadas",
+    tipo: "Base",
+    naipe: "Espadas",
+    valor: "3",
+    img: assetUrl("assets/cards/base/espadas/3_espadas.png")
+  },
+  {
+    id: "sp-4",
+    nome: "4 de Espadas",
+    tipo: "Base",
+    naipe: "Espadas",
+    valor: "4",
+    img: assetUrl("assets/cards/base/espadas/4_espadas.png")
+  }
+];
 
 function filterCards() {
   return CARDS.filter(c => {
@@ -142,6 +175,5 @@ export function renderCollectionView() {
 
 // quando a home manda o evento
 window.addEventListener("unpled:open-collection", () => {
-  // garante re-render se quiser
   render();
 });
