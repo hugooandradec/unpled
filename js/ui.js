@@ -63,6 +63,53 @@ function ensureBackOverlay() {
       -webkit-backdrop-filter: blur(10px);
       box-shadow: 0 18px 40px rgba(0,0,0,0.45);
     }
+
+    /* ===== Home menu minimal (caso seu CSS não tenha) ===== */
+    #view-home{
+      width: min(980px, 92vw);
+      margin: 0 auto;
+      padding: 64px 0 36px;
+    }
+    .home-title{
+      margin: 0 0 26px;
+      font-weight: 900;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      font-size: 34px;
+      text-align: center;
+      opacity: .95;
+    }
+    .home-menu{
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 12px;
+    }
+    .menu-item{
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.10);
+      background: rgba(20,22,26,0.45);
+      color: rgba(255,255,255,0.92);
+      cursor: pointer;
+      text-decoration: none;
+      outline: none;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 16px 36px rgba(0,0,0,0.35);
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      justify-content: center;
+    }
+    .menu-item.is-active{
+      border-color: rgba(255,255,255,0.22);
+      transform: translateY(-1px);
+    }
   `;
   document.head.appendChild(style);
 
@@ -102,10 +149,27 @@ export function showView(view) {
   if (main) main.scrollTo({ top: 0, behavior: "auto" });
 }
 
-// ===== Renderers (play/settings minimal) =====
+// ===== Renderers =====
 export function renderHomeView() {
-  // Sua home já tá no HTML (menu com data-action), então aqui é só garantir o overlay
   ensureBackOverlay();
+
+  const root = document.getElementById("view-home");
+  if (!root) return;
+
+  // Se já renderizou uma vez, não recria tudo (evita duplicar listeners)
+  if (root.dataset.ready === "1") return;
+
+  root.innerHTML = `
+    <h1 class="home-title">UNPLED</h1>
+
+    <div class="home-menu" role="menu" aria-label="Menu principal">
+      <button class="menu-item is-active" data-action="play" type="button" role="menuitem">Jogar</button>
+      <button class="menu-item" data-action="collection" type="button" role="menuitem">Coleção</button>
+      <button class="menu-item" data-action="settings" type="button" role="menuitem">Configurações</button>
+    </div>
+  `;
+
+  root.dataset.ready = "1";
 }
 
 export function renderPlayView() {
@@ -197,6 +261,9 @@ function initHomeMenu() {
 export function bootUI() {
   ensureBackOverlay();
   setOnlineStatus();
+
+  // ✅ agora a Home realmente existe
+  renderHomeView();
   initHomeMenu();
 
   // sempre HOME no boot (pra não “travar” em coleção)
