@@ -4,42 +4,32 @@ import { openPack } from "./gacha.js";
 import {
   bootUI,
   setOnlineStatus,
-  updateCoins,
-  renderHomeView,
-  renderPlayView,
-  renderCollectionView,
-  renderSettingsView,
-  showView
+  updateCoins
 } from "./ui.js";
 
 let state = loadState() || {};
 if (typeof state.coins !== "number") state.coins = 0;
 
 function init() {
-  // render views (home já existe no HTML, mas ok)
-  renderHomeView();
-  renderPlayView();
-  renderCollectionView();
-  renderSettingsView();
-
-  // UI boot (menu + voltar + status)
+  // 🔥 UM ÚNICO PONTO DE BOOT DA UI
   bootUI();
 
   updateCoins(state.coins);
   setOnlineStatus();
 
-  // service worker (não trava se falhar)
+  // service worker
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   }
 }
 
-// pack
+// abrir pack
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("#btnOpenPack");
   if (!btn) return;
 
   const cards = openPack();
+
   state.coins += 10;
   saveState(state);
   updateCoins(state.coins);
