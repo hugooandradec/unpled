@@ -1,9 +1,10 @@
 {
   "name": "UNPLED",
   "short_name": "UNPLED",
-  "start_url": "./index.html",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0f1115",
+  "background_color": "#14161a",
   "theme_color": "#14161a",
   "icons": [
     {
