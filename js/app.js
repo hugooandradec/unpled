@@ -11,34 +11,47 @@ let state = loadState() || {};
 if (typeof state.coins !== "number") state.coins = 0;
 
 function init() {
-  // 🔥 UM ÚNICO PONTO DE BOOT DA UI
+  // Inicializa UI inteira
   bootUI();
 
   updateCoins(state.coins);
   setOnlineStatus();
 
-  // service worker
+  // Service Worker
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("./sw.js").catch(() => {});
   }
 }
 
-// abrir pack
+// =========================
+// GACHA – ABRIR PACK
+// =========================
 document.addEventListener("click", (e) => {
   const btn = e.target.closest("#btnOpenPack");
   if (!btn) return;
 
-  const cards = openPack();
+  const PACK_COST = 10;
 
-  state.coins += 10;
+  if (state.coins < PACK_COST) {
+    alert(`Sem moedas 😭 Precisa de ${PACK_COST}.`);
+    return;
+  }
+
+  // paga o pack
+  state.coins -= PACK_COST;
   saveState(state);
   updateCoins(state.coins);
 
-  const log = document.getElementById("playLog");
-  if (log) {
-    const text = cards.map(c => `${c.rank}${c.suitSymbol}`).join(" • ");
-    log.textContent = `Pack aberto: ${text}`;
-  }
+  // gera cartas
+  const cards = openPack();
+
+  // salva pack pendente
+  localStorage.setItem("unpled:pendingPack", JSON.stringify(cards));
+
+  // avisa UI
+  window.dispatchEvent(
+    new CustomEvent("unpled:pack-opened", { detail: { cards } })
+  );
 });
 
 document.addEventListener("DOMContentLoaded", init);
