@@ -1,48 +1,63 @@
-const CACHE_NAME = "unpled-v2";
+const CACHE_NAME = "unpled-v2"; // sobe a versão pra forçar update
 
 const ASSETS = [
   "./",
   "./index.html",
-
-  // CSS corretos (os que seu index.html realmente usa)
-  "./css/global.css",
-  "./css/index.css",
-  "./css/collection.css",
-
-  // JS
+  "./css/styles.css",
   "./js/app.js",
   "./js/ui.js",
   "./js/gacha.js",
   "./js/storage.js",
-  "./js/collection.js",
-
-  // Dados
-  "./data/cards.js",
-
-  // PWA
   "./manifest.webmanifest",
 
-  // Ícones (ajusta conforme seus arquivos reais)
-  "./assets/icons/icon-192.png",
-  "./assets/icons/icon-512.png"
+  // só deixa aqui se EXISTIR no repo:
+  // "./data/cards.js",
+  // "./assets/icons/icon-192.png",
+  // "./assets/icons/icon-512.png",
 ];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
+    (async () => {
+      const cache = await caches.open(CACHE_NAME);
+
+      // adiciona um por um (se falhar, não quebra tudo)
+      await Promise.allSettled(
+        ASSETS.map((url) => cache.add(url))
+      );
+
+      self.skipWaiting();
+    })()
   );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.map(k => k !== CACHE_NAME && caches.delete(k)))
-    )
+    (async () => {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => (k === CACHE_NAME ? null : caches.delete(k))));
+      self.clients.claim();
+    })()
   );
 });
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
-    caches.match(event.request).then(res => res || fetch(event.request))
+    (async () => {
+      const cached = await caches.match(event.request);
+      if (cached) return cached;
+
+      try {
+        const res = await fetch(event.request);
+        // opcional: cacheia GETs bem-sucedidos
+        if (event.request.method === "GET" && res.ok) {
+          const cache = await caches.open(CACHE_NAME);
+          cache.put(event.request, res.clone());
+        }
+        return res;
+      } catch (e) {
+        return cached || Response.error();
+      }
+    })()
   );
 });
