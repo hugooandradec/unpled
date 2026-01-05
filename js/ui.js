@@ -65,33 +65,40 @@ function ensureBackOverlay() {
     }
 
     /* ===== Home menu minimal (caso seu CSS não tenha) ===== */
+
+    /* 🔽 desce o bloco da home */
     #view-home{
       width: min(980px, 92vw);
       margin: 0 auto;
-      padding: 64px 0 36px;
+      padding: 110px 0 36px;
     }
+
+    /* 🔥 título maior */
     .home-title{
-      margin: 0 0 26px;
+      margin: 0 0 34px;
       font-weight: 900;
-      letter-spacing: .22em;
+      letter-spacing: .28em;
       text-transform: uppercase;
-      font-size: 34px;
+      font-size: 46px;
       text-align: center;
-      opacity: .95;
+      opacity: .96;
     }
+
     .home-menu{
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      margin-top: 12px;
+      gap: 16px;
+      margin-top: 6px;
     }
+
+    /* 🔽 botões um pouco menores */
     .menu-item{
       width: 100%;
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 16px 18px;
-      border-radius: 14px;
+      padding: 14px 16px;
+      border-radius: 12px;
       border: 1px solid rgba(255,255,255,0.10);
       background: rgba(20,22,26,0.45);
       color: rgba(255,255,255,0.92);
@@ -105,7 +112,9 @@ function ensureBackOverlay() {
       letter-spacing: .08em;
       text-transform: uppercase;
       justify-content: center;
+      font-size: 13px;
     }
+
     .menu-item.is-active{
       border-color: rgba(255,255,255,0.22);
       transform: translateY(-1px);
