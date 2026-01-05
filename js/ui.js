@@ -20,20 +20,17 @@ function shuffle(arr) {
 }
 
 // =========================
-// ASSET URLS (à prova de subpasta)
+// ASSET URLS (mais robusto)
 // =========================
-// ui.js está em /js/ui.js → assets está em /assets/...
-const ASSETS_BASE = new URL("../assets/", import.meta.url);
-
-function assetUrl(relPathFromAssets) {
-  // retorna string absoluta/segura
-  return new URL(relPathFromAssets, ASSETS_BASE).toString();
+// Usa o baseURI do index.html (funciona em /unpled/ e local)
+function assetUrl(pathFromRoot) {
+  // pathFromRoot exemplo: "assets/cards/_frame/base_border.png"
+  return new URL(pathFromRoot, document.baseURI).toString();
 }
 
-const PATH_FRAME = assetUrl("cards/_frame/base_border.png");
-const pathEspadas = (rank) => assetUrl(`cards/base/espadas/${rank}_espadas.png`);
+const PATH_FRAME = assetUrl("assets/cards/_frame/base_border.png");
+const pathEspadas = (rank) => assetUrl(`assets/cards/base/espadas/${rank}_espadas.png`);
 
-// Só A,2,3,4 de espadas. Mão tem 5 → repete 1 aleatória.
 function buildHand5() {
   const base = [
     { rank: "A", img: pathEspadas("A") },
@@ -42,7 +39,7 @@ function buildHand5() {
     { rank: "4", img: pathEspadas("4") }
   ];
   const extra = base[Math.floor(Math.random() * base.length)];
-  return shuffle([...base, { ...extra }]);
+  return shuffle([...base, { ...extra }]); // 5 cartas
 }
 
 // =========================
@@ -71,6 +68,57 @@ export function showView(view) {
   const id = normalizeViewId(view);
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
+
+  // controla botão voltar global na coleção
+  updateGlobalBackVisibility();
+}
+
+// =========================
+// GLOBAL BACK (pra Coleção sem mexer no collection.js)
+// =========================
+function ensureGlobalBack() {
+  if (document.getElementById("uGlobalBack")) return;
+
+  const btn = document.createElement("button");
+  btn.id = "uGlobalBack";
+  btn.textContent = "VOLTAR";
+  btn.addEventListener("click", () => showView("view-home"));
+
+  const style = document.createElement("style");
+  style.textContent = `
+    #uGlobalBack{
+      position:fixed;
+      top:18px;
+      left:18px;
+      z-index:9999;
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(15,18,30,.55);
+      color:rgba(255,255,255,.92);
+      padding:10px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:900;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:12px;
+      backdrop-filter:blur(10px);
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+      display:none;
+    }
+  `;
+  document.head.appendChild(style);
+  document.body.appendChild(btn);
+}
+
+function updateGlobalBackVisibility() {
+  const btn = document.getElementById("uGlobalBack");
+  if (!btn) return;
+
+  const col = document.getElementById("view-collection");
+  const isCollectionActive = !!(col && col.classList.contains("active"));
+
+  // mostra só na coleção
+  btn.style.display = isCollectionActive ? "block" : "none";
 }
 
 // =========================
@@ -131,12 +179,10 @@ function ensureUIStyles() {
       padding:22px 18px 18px;
       position:relative;
       overflow:hidden;
-
       background:
         radial-gradient(circle at 30% 20%, rgba(255,255,255,.10), transparent 45%),
         radial-gradient(circle at 80% 70%, rgba(0,0,0,.35), transparent 55%),
         linear-gradient(180deg, #0f6b2f, #0b4f23);
-
       border:1px solid rgba(255,255,255,.14);
       box-shadow:0 30px 70px rgba(0,0,0,.55);
     }
@@ -168,6 +214,9 @@ function ensureUIStyles() {
       perspective:900px;
       user-select:none;
       flex:0 0 auto;
+      /* debug leve: se por algum motivo sumir, pelo menos tem "caixa" */
+      background:rgba(255,255,255,.02);
+      border-radius:14px;
     }
     @media (max-width: 520px){
       .u-card{ width:92px; height:132px; }
@@ -283,10 +332,9 @@ function ensureUIStyles() {
 }
 
 // =========================
-// HOME (não mexo no teu se já tiver render)
+// HOME (não sobrescreve se você já tem)
 // =========================
 export function renderHomeView() {
-  // se você já renderiza o home em outro arquivo, ignora
   const root = document.getElementById("view-home");
   if (!root) return;
   if (root.dataset.keep === "1") return;
@@ -313,9 +361,10 @@ export function renderHomeView() {
 }
 
 // =========================
-// COLEÇÃO (teu módulo real)
+// COLEÇÃO
 // =========================
 export function renderCollectionView() {
+  // o botão voltar global vai aparecer automaticamente quando essa view estiver active
   renderCollectionModule();
 }
 
@@ -399,10 +448,13 @@ export function renderPlayView() {
       </div>
     `).join("");
 
-    // seta frame em todas (garante que carregou)
     handEl.querySelectorAll(".u-frame").forEach(img => {
       img.src = PATH_FRAME;
     });
+
+    // debug (pra você ver no console se o caminho tá certo)
+    // console.log("FRAME:", PATH_FRAME);
+    // console.log("EX:", hand[0]?.img);
   }
 
   function reveal(i) {
@@ -413,12 +465,7 @@ export function renderPlayView() {
     const art = el.querySelector(".u-art");
     const front = el.querySelector(".u-front");
 
-    art.onload = () => {
-      // ok
-    };
-
     art.onerror = () => {
-      // fallback visível se path der ruim
       const fb = document.createElement("div");
       fb.className = "u-fallback";
       fb.textContent = `${card.rank}♠`;
@@ -426,7 +473,6 @@ export function renderPlayView() {
     };
 
     art.src = card.img;
-
     el.classList.add("u-flipped");
   }
 
@@ -452,7 +498,6 @@ export function renderPlayView() {
     updateUI();
   }
 
-  // init
   renderBacks();
   idx = 0;
   updateUI();
@@ -477,10 +522,8 @@ export function renderPlayView() {
     hand = buildHand5();
     idx = 0;
     renderBacks();
-
     autoOn = true;
     btnAuto.textContent = "Auto: ON";
-
     updateUI();
     startAuto();
   });
@@ -490,6 +533,7 @@ export function renderPlayView() {
 // BOOT
 // =========================
 export function bootUI() {
+  ensureGlobalBack();
   ensureUIStyles();
 
   renderHomeView();
