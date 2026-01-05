@@ -1,5 +1,7 @@
 // js/ui.js (ES Module)
 
+import { renderCollectionView as renderCollectionModule } from "./collection.js";
+
 // =========================
 // HELPERS
 // =========================
@@ -18,26 +20,19 @@ function shuffle(arr) {
   return a;
 }
 
-// Caminhos das imagens (relativos ao index.html)
-// Isso funciona em GitHub Pages (…/unpled/) e local.
+// paths (relativos ao index.html)
 const PATH_FRAME = "./assets/cards/_frame/base_border.png";
-function pathEspadas(rank) {
-  return `./assets/cards/base/espadas/${rank}_espadas.png`;
-}
+const pathEspadas = (rank) => `./assets/cards/base/espadas/${rank}_espadas.png`;
 
-// Só A,2,3,4 de espadas. Mão tem 5, então repete 1 aleatória.
 function buildHand5() {
   const base = [
-    { rank: "A", suit: "spades", img: pathEspadas("A") },
-    { rank: "2", suit: "spades", img: pathEspadas("2") },
-    { rank: "3", suit: "spades", img: pathEspadas("3") },
-    { rank: "4", suit: "spades", img: pathEspadas("4") }
+    { rank: "A", img: pathEspadas("A") },
+    { rank: "2", img: pathEspadas("2") },
+    { rank: "3", img: pathEspadas("3") },
+    { rank: "4", img: pathEspadas("4") }
   ];
-
   const extra = base[Math.floor(Math.random() * base.length)];
-  const hand = shuffle([...base, { ...extra }]);
-
-  return hand;
+  return shuffle([...base, { ...extra }]); // 5 cartas
 }
 
 // =========================
@@ -66,9 +61,6 @@ export function showView(view) {
   const id = normalizeViewId(view);
   document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
-
-  const main = document.querySelector(".screen");
-  if (main) main.scrollTo({ top: 0, behavior: "auto" });
 }
 
 // =========================
@@ -80,51 +72,14 @@ function ensureUIStyles() {
   const style = document.createElement("style");
   style.id = "unpled-ui-styles";
   style.textContent = `
-    /* HOME (simples) */
-    #view-home{
-      width:min(980px,92vw);
-      margin:0 auto;
-      padding:90px 0 36px;
-      text-align:center;
-    }
-    .home-title{
-      margin:0 0 34px;
-      font-weight:900;
-      letter-spacing:.28em;
-      text-transform:uppercase;
-      font-size:46px;
-      opacity:.96;
-    }
-    .home-menu{
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-      align-items:center;
-    }
-    .menu-item{
-      width:min(520px, 92vw);
-      padding:14px 16px;
-      font-size:13px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(20,22,26,.45);
-      color:#fff;
-      font-weight:800;
-      letter-spacing:.08em;
-      text-transform:uppercase;
-      cursor:pointer;
-      backdrop-filter:blur(12px);
-      box-shadow:0 16px 36px rgba(0,0,0,.35);
-    }
-
-    /* PLAY - mesa verde cassino */
-    .play-wrap{
+    /* PLAY WRAP */
+    .u-play-wrap{
       width:min(980px,92vw);
       margin:0 auto;
       padding:64px 0 40px;
       text-align:center;
     }
-    .play-title{
+    .u-play-title{
       margin:0 0 18px;
       font-weight:900;
       letter-spacing:.22em;
@@ -133,12 +88,13 @@ function ensureUIStyles() {
       opacity:.95;
     }
 
-    .table{
+    /* mesa verde */
+    .u-table{
       width:100%;
       max-width:900px;
       margin:0 auto;
       border-radius:22px;
-      padding:24px 18px 20px;
+      padding:22px 18px 18px;
       position:relative;
       overflow:hidden;
       background:
@@ -148,46 +104,51 @@ function ensureUIStyles() {
       border:1px solid rgba(255,255,255,.14);
       box-shadow:0 30px 70px rgba(0,0,0,.55);
     }
-    .table::before{
+    .u-table::before{
       content:"";
       position:absolute;
       inset:10px;
       border-radius:16px;
       border:1px solid rgba(255,255,255,.10);
       pointer-events:none;
+      z-index:1;
     }
 
-    .hand-row{
+    /* mão */
+    .u-hand-row{
+      position:relative;
+      z-index:2;
       display:flex;
       justify-content:center;
       gap:14px;
       flex-wrap:wrap;
       padding:10px 8px 0;
+      min-height:170px;
     }
 
-    /* Carta flip */
-    .card{
+    /* carta flip (prefixado pra não conflitar com teu CSS) */
+    .u-card{
       width:110px;
       height:156px;
       perspective:900px;
       user-select:none;
     }
     @media (max-width: 520px){
-      .card{ width:92px; height:132px; }
+      .u-card{ width:92px; height:132px; }
     }
 
-    .card-inner{
+    .u-card-inner{
       width:100%;
       height:100%;
       position:relative;
       transform-style:preserve-3d;
       transition:transform .55s cubic-bezier(.2,.9,.2,1);
     }
-    .card.is-flipped .card-inner{
+    .u-card.u-flipped .u-card-inner{
       transform:rotateY(180deg);
     }
 
-    .card-face{
+    .u-face{
       position:absolute;
       inset:0;
       border-radius:14px;
@@ -200,13 +161,13 @@ function ensureUIStyles() {
       border:1px solid rgba(255,255,255,.18);
     }
 
-    /* Verso */
-    .card-back{
+    /* verso */
+    .u-back{
       background:
         radial-gradient(circle at 30% 20%, rgba(255,255,255,.12), transparent 40%),
         linear-gradient(135deg, rgba(120,60,220,.85), rgba(30,20,60,.85));
     }
-    .card-back::after{
+    .u-back::after{
       content:"UNPLED";
       font-weight:900;
       letter-spacing:.22em;
@@ -215,40 +176,37 @@ function ensureUIStyles() {
       text-transform:uppercase;
     }
 
-    /* Frente com imagem */
-    .card-front{
+    /* frente com imagem */
+    .u-front{
       transform:rotateY(180deg);
-      background:rgba(0,0,0,.10);
+      background:rgba(0,0,0,.08);
       position:relative;
     }
-
-    .card-art,
-    .card-frame{
+    .u-art, .u-frame{
       position:absolute;
       inset:0;
       width:100%;
       height:100%;
-      object-fit:cover;
       display:block;
     }
-
-    /* A moldura por cima da arte */
-    .card-frame{
-      pointer-events:none;
+    .u-art{ object-fit:cover; }
+    .u-frame{
       object-fit:contain;
+      pointer-events:none;
       transform:scale(1.01);
     }
 
-    /* Controles */
-    .controls{
+    /* controles */
+    .u-controls{
+      position:relative;
+      z-index:2;
       display:flex;
       justify-content:center;
       gap:10px;
       flex-wrap:wrap;
-      margin-top:16px;
+      margin-top:14px;
     }
-
-    .btn{
+    .u-btn{
       border:1px solid rgba(255,255,255,.18);
       background:rgba(15,18,30,.55);
       color:rgba(255,255,255,.92);
@@ -262,13 +220,12 @@ function ensureUIStyles() {
       backdrop-filter:blur(10px);
       box-shadow:0 18px 40px rgba(0,0,0,.35);
     }
-    .btn:disabled{
-      opacity:.45;
-      cursor:not-allowed;
-    }
+    .u-btn:disabled{ opacity:.45; cursor:not-allowed; }
 
-    .hint{
-      margin-top:12px;
+    .u-hint{
+      position:relative;
+      z-index:2;
+      margin-top:10px;
       font-size:13px;
       opacity:.85;
     }
@@ -277,124 +234,53 @@ function ensureUIStyles() {
 }
 
 // =========================
-// HOME
+// HOME (se você já tem pronto, isso só não atrapalha)
 // =========================
 export function renderHomeView() {
-  ensureUIStyles();
   const root = document.getElementById("view-home");
-  if (!root || root.dataset.ready === "1") return;
+  if (!root) return;
+
+  // Se o teu home já é renderizado em outro lugar, não sobrescreve.
+  if (root.dataset.keep === "1") return;
+  if (root.dataset.ready === "1") return;
 
   root.innerHTML = `
-    <h1 class="home-title">UNPLED</h1>
-    <div class="home-menu">
-      <button class="menu-item" id="goPlay">Jogar</button>
-      <button class="menu-item" id="goCollection">Coleção</button>
-      <button class="menu-item" id="goSettings">Configurações</button>
+    <div style="width:min(980px,92vw);margin:0 auto;padding:90px 0 36px;text-align:center;">
+      <h1 style="margin:0 0 34px;font-weight:900;letter-spacing:.28em;text-transform:uppercase;font-size:46px;opacity:.96;">
+        UNPLED
+      </h1>
+      <div style="display:flex;flex-direction:column;gap:16px;align-items:center;">
+        <button class="menu-item" id="goPlay">Jogar</button>
+        <button class="menu-item" id="goCollection">Coleção</button>
+        <button class="menu-item" id="goSettings">Configurações</button>
+      </div>
     </div>
   `;
 
-  root.querySelector("#goPlay")?.addEventListener("click", () => showView("view-play"));
-  root.querySelector("#goCollection")?.addEventListener("click", () => showView("view-collection"));
+  root.querySelector("#goPlay")?.addEventListener("click", () => {
+    showView("view-play");
+    window.dispatchEvent(new CustomEvent("unpled:entered-play"));
+  });
+
+  root.querySelector("#goCollection")?.addEventListener("click", () => {
+    showView("view-collection");
+    window.dispatchEvent(new CustomEvent("unpled:open-collection"));
+  });
+
   root.querySelector("#goSettings")?.addEventListener("click", () => showView("view-settings"));
 
   root.dataset.ready = "1";
 }
 
 // =========================
-// PLAY
+// COLEÇÃO (volta a usar teu módulo real)
 // =========================
-export function renderPlayView() {
-  ensureUIStyles();
-
-  const root = document.getElementById("view-play");
-  if (!root) return;
-
-  root.innerHTML = `
-    <div class="play-wrap">
-      <h1 class="play-title">JOGAR</h1>
-
-      <div class="table">
-        <div class="hand-row" id="handRow"></div>
-
-        <div class="controls">
-          <button class="btn" id="btnFlip">Virar carta</button>
-          <button class="btn" id="btnNewHand">Nova mão</button>
-        </div>
-
-        <div class="hint" id="hintText">Clique em “Virar carta” pra revelar uma por vez.</div>
-      </div>
-    </div>
-  `;
-
-  const handRow = root.querySelector("#handRow");
-  const btnFlip = root.querySelector("#btnFlip");
-  const btnNewHand = root.querySelector("#btnNewHand");
-  const hintText = root.querySelector("#hintText");
-
-  let hand = buildHand5();
-  let flipIndex = 0;
-
-  function renderHandBacks() {
-    handRow.innerHTML = hand.map((_, i) => `
-      <div class="card" data-i="${i}">
-        <div class="card-inner">
-          <div class="card-face card-back"></div>
-          <div class="card-face card-front">
-            <img class="card-art" alt="" />
-            <img class="card-frame" alt="" />
-          </div>
-        </div>
-      </div>
-    `).join("");
-
-    // já seta frame em todas (uma vez)
-    handRow.querySelectorAll(".card-frame").forEach(img => {
-      img.src = PATH_FRAME;
-      img.alt = "moldura";
-    });
-  }
-
-  function revealCard(i) {
-    const card = hand[i];
-    const el = handRow.querySelector(`.card[data-i="${i}"]`);
-    if (!card || !el) return;
-
-    const art = el.querySelector(".card-art");
-    art.src = card.img;
-    art.alt = `${card.rank} de espadas`;
-
-    el.classList.add("is-flipped");
-  }
-
-  function updateControls() {
-    const done = flipIndex >= hand.length;
-    btnFlip.disabled = done;
-    hintText.textContent = done
-      ? "Mão completa. Clique em “Nova mão”."
-      : "Clique em “Virar carta” pra revelar uma por vez.";
-  }
-
-  // inicial
-  renderHandBacks();
-  updateControls();
-
-  btnFlip.addEventListener("click", () => {
-    if (flipIndex >= hand.length) return;
-    revealCard(flipIndex);
-    flipIndex++;
-    updateControls();
-  });
-
-  btnNewHand.addEventListener("click", () => {
-    hand = buildHand5();
-    flipIndex = 0;
-    renderHandBacks();
-    updateControls();
-  });
+export function renderCollectionView() {
+  renderCollectionModule();
 }
 
 // =========================
-// PLACEHOLDERS
+// SETTINGS (placeholder)
 // =========================
 export function renderSettingsView() {
   const root = document.getElementById("view-settings");
@@ -402,10 +288,146 @@ export function renderSettingsView() {
   root.innerHTML = `<div style="padding:90px; text-align:center; opacity:.85;">Em breve…</div>`;
 }
 
-export function renderCollectionView() {
-  const root = document.getElementById("view-collection");
+// =========================
+// PLAY (mesa + auto flip)
+// =========================
+let autoTimer = null;
+
+export function renderPlayView() {
+  ensureUIStyles();
+
+  const root = document.getElementById("view-play");
   if (!root) return;
-  root.innerHTML = `<div style="padding:90px; text-align:center; opacity:.85;">Coleção (por enquanto) 😄</div>`;
+
+  root.innerHTML = `
+    <div class="u-play-wrap">
+      <h1 class="u-play-title">JOGAR</h1>
+
+      <div class="u-table">
+        <div class="u-hand-row" id="uHand"></div>
+
+        <div class="u-controls">
+          <button class="u-btn" id="uFlip">Virar carta</button>
+          <button class="u-btn" id="uAuto">Auto: ON</button>
+          <button class="u-btn" id="uNew">Nova mão</button>
+        </div>
+
+        <div class="u-hint" id="uHint">Virando automaticamente…</div>
+      </div>
+    </div>
+  `;
+
+  const handEl = root.querySelector("#uHand");
+  const btnFlip = root.querySelector("#uFlip");
+  const btnAuto = root.querySelector("#uAuto");
+  const btnNew = root.querySelector("#uNew");
+  const hint = root.querySelector("#uHint");
+
+  let hand = buildHand5();
+  let idx = 0;
+  let autoOn = true;
+
+  function stopAuto() {
+    if (autoTimer) {
+      clearInterval(autoTimer);
+      autoTimer = null;
+    }
+  }
+
+  function startAuto() {
+    stopAuto();
+    autoTimer = setInterval(() => {
+      if (!autoOn) return;
+      flipOne();
+    }, 850);
+  }
+
+  function renderBacks() {
+    handEl.innerHTML = hand.map((_, i) => `
+      <div class="u-card" data-i="${i}">
+        <div class="u-card-inner">
+          <div class="u-face u-back"></div>
+          <div class="u-face u-front">
+            <img class="u-art" alt="" />
+            <img class="u-frame" alt="frame" src="${PATH_FRAME}" />
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function reveal(i) {
+    const card = hand[i];
+    const el = handEl.querySelector(`.u-card[data-i="${i}"]`);
+    if (!card || !el) return;
+
+    const art = el.querySelector(".u-art");
+    art.onerror = () => {
+      console.warn("Falhou imagem:", card.img);
+      // se der ruim no path, pelo menos você vê algo
+      art.remove();
+      const front = el.querySelector(".u-front");
+      front.innerHTML += `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+        font-weight:900;color:#111;background:rgba(255,255,255,.9);">
+        ${card.rank}♠
+      </div>`;
+    };
+    art.src = card.img;
+
+    el.classList.add("u-flipped");
+  }
+
+  function updateUI() {
+    const done = idx >= hand.length;
+    btnFlip.disabled = done;
+
+    if (done) {
+      hint.textContent = "Mão completa. Clique em “Nova mão”.";
+      stopAuto();
+      return;
+    }
+
+    hint.textContent = autoOn
+      ? "Virando automaticamente…"
+      : "Auto OFF. Clique em “Virar carta”.";
+  }
+
+  function flipOne() {
+    if (idx >= hand.length) return;
+    reveal(idx);
+    idx++;
+    updateUI();
+  }
+
+  // init
+  renderBacks();
+  idx = 0;
+  updateUI();
+  startAuto();
+
+  btnFlip.addEventListener("click", () => flipOne());
+
+  btnAuto.addEventListener("click", () => {
+    autoOn = !autoOn;
+    btnAuto.textContent = autoOn ? "Auto: ON" : "Auto: OFF";
+    if (autoOn) startAuto();
+    else stopAuto();
+    updateUI();
+  });
+
+  btnNew.addEventListener("click", () => {
+    hand = buildHand5();
+    idx = 0;
+    renderBacks();
+    // volta auto ligado
+    autoOn = true;
+    btnAuto.textContent = "Auto: ON";
+    updateUI();
+    startAuto();
+  });
+
+  // quando sair da tela, para o timer (pra não ficar rodando oculto)
+  window.addEventListener("unpled:stop-play-timers", stopAuto, { once: true });
 }
 
 // =========================
