@@ -18,18 +18,22 @@ function shuffle(arr) {
   return a;
 }
 
-// Só as cartas que você quer (já “existem” no seu universo):
-// A♠, 2♠, 3♠, 4♠.
-// Mão tem 5: então repete uma (random) pra completar.
+// Caminhos das imagens (relativos ao index.html)
+// Isso funciona em GitHub Pages (…/unpled/) e local.
+const PATH_FRAME = "./assets/cards/_frame/base_border.png";
+function pathEspadas(rank) {
+  return `./assets/cards/base/espadas/${rank}_espadas.png`;
+}
+
+// Só A,2,3,4 de espadas. Mão tem 5, então repete 1 aleatória.
 function buildHand5() {
   const base = [
-    { rank: "A", suit: "spades", suitSymbol: "♠" },
-    { rank: "2", suit: "spades", suitSymbol: "♠" },
-    { rank: "3", suit: "spades", suitSymbol: "♠" },
-    { rank: "4", suit: "spades", suitSymbol: "♠" }
+    { rank: "A", suit: "spades", img: pathEspadas("A") },
+    { rank: "2", suit: "spades", img: pathEspadas("2") },
+    { rank: "3", suit: "spades", img: pathEspadas("3") },
+    { rank: "4", suit: "spades", img: pathEspadas("4") }
   ];
 
-  // duplica uma aleatória pra dar 5
   const extra = base[Math.floor(Math.random() * base.length)];
   const hand = shuffle([...base, { ...extra }]);
 
@@ -68,7 +72,7 @@ export function showView(view) {
 }
 
 // =========================
-// GLOBAL STYLES (uma vez)
+// STYLES (uma vez)
 // =========================
 function ensureUIStyles() {
   if (document.getElementById("unpled-ui-styles")) return;
@@ -76,7 +80,7 @@ function ensureUIStyles() {
   const style = document.createElement("style");
   style.id = "unpled-ui-styles";
   style.textContent = `
-    /* HOME */
+    /* HOME (simples) */
     #view-home{
       width:min(980px,92vw);
       margin:0 auto;
@@ -137,8 +141,6 @@ function ensureUIStyles() {
       padding:24px 18px 20px;
       position:relative;
       overflow:hidden;
-
-      /* feltro verde + vinheta */
       background:
         radial-gradient(circle at 30% 20%, rgba(255,255,255,.10), transparent 45%),
         radial-gradient(circle at 80% 70%, rgba(0,0,0,.35), transparent 55%),
@@ -146,8 +148,6 @@ function ensureUIStyles() {
       border:1px solid rgba(255,255,255,.14);
       box-shadow:0 30px 70px rgba(0,0,0,.55);
     }
-
-    /* "borda" de mesa */
     .table::before{
       content:"";
       position:absolute;
@@ -165,7 +165,7 @@ function ensureUIStyles() {
       padding:10px 8px 0;
     }
 
-    /* Carta (flip) */
+    /* Carta flip */
     .card{
       width:110px;
       height:156px;
@@ -200,7 +200,7 @@ function ensureUIStyles() {
       border:1px solid rgba(255,255,255,.18);
     }
 
-    /* Verso (fundo da carta) */
+    /* Verso */
     .card-back{
       background:
         radial-gradient(circle at 30% 20%, rgba(255,255,255,.12), transparent 40%),
@@ -215,49 +215,29 @@ function ensureUIStyles() {
       text-transform:uppercase;
     }
 
-    /* Frente */
+    /* Frente com imagem */
     .card-front{
-      background:
-        radial-gradient(circle at 20% 10%, rgba(0,0,0,.06), transparent 50%),
-        linear-gradient(180deg, rgba(255,255,255,.92), rgba(245,245,245,.88));
       transform:rotateY(180deg);
-      color:#121212;
+      background:rgba(0,0,0,.10);
+      position:relative;
     }
 
-    .card-front .rank{
+    .card-art,
+    .card-frame{
       position:absolute;
-      top:10px;
-      left:10px;
-      font-weight:900;
-      font-size:18px;
-    }
-    .card-front .suit{
-      position:absolute;
-      top:32px;
-      left:11px;
-      font-size:16px;
-      opacity:.9;
-    }
-    .card-front .center{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:6px;
-    }
-    .card-front .big{
-      font-weight:900;
-      font-size:34px;
-      line-height:1;
-    }
-    .card-front .bigSuit{
-      font-size:26px;
-      line-height:1;
-      opacity:.95;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
     }
 
-    /* Preto para espadas */
-    .spades{ color:#111; }
+    /* A moldura por cima da arte */
+    .card-frame{
+      pointer-events:none;
+      object-fit:contain;
+      transform:scale(1.01);
+    }
 
     /* Controles */
     .controls{
@@ -321,7 +301,7 @@ export function renderHomeView() {
 }
 
 // =========================
-// PLAY - mesa + mão 5 cartas
+// PLAY
 // =========================
 export function renderPlayView() {
   ensureUIStyles();
@@ -351,8 +331,7 @@ export function renderPlayView() {
   const btnNewHand = root.querySelector("#btnNewHand");
   const hintText = root.querySelector("#hintText");
 
-  // Estado local da tela
-  let hand = buildHand5();     // 5 cartas (A-4♠ + 1 repetida)
+  let hand = buildHand5();
   let flipIndex = 0;
 
   function renderHandBacks() {
@@ -361,16 +340,18 @@ export function renderPlayView() {
         <div class="card-inner">
           <div class="card-face card-back"></div>
           <div class="card-face card-front">
-            <div class="rank"></div>
-            <div class="suit"></div>
-            <div class="center">
-              <div class="big"></div>
-              <div class="bigSuit"></div>
-            </div>
+            <img class="card-art" alt="" />
+            <img class="card-frame" alt="" />
           </div>
         </div>
       </div>
     `).join("");
+
+    // já seta frame em todas (uma vez)
+    handRow.querySelectorAll(".card-frame").forEach(img => {
+      img.src = PATH_FRAME;
+      img.alt = "moldura";
+    });
   }
 
   function revealCard(i) {
@@ -378,20 +359,10 @@ export function renderPlayView() {
     const el = handRow.querySelector(`.card[data-i="${i}"]`);
     if (!card || !el) return;
 
-    const front = el.querySelector(".card-front");
-    const rank = front.querySelector(".rank");
-    const suit = front.querySelector(".suit");
-    const big = front.querySelector(".big");
-    const bigSuit = front.querySelector(".bigSuit");
+    const art = el.querySelector(".card-art");
+    art.src = card.img;
+    art.alt = `${card.rank} de espadas`;
 
-    // espadas: preto
-    front.classList.add("spades");
-    rank.textContent = card.rank;
-    suit.textContent = card.suitSymbol;
-    big.textContent = card.rank;
-    bigSuit.textContent = card.suitSymbol;
-
-    // flip
     el.classList.add("is-flipped");
   }
 
@@ -409,10 +380,8 @@ export function renderPlayView() {
 
   btnFlip.addEventListener("click", () => {
     if (flipIndex >= hand.length) return;
-
     revealCard(flipIndex);
     flipIndex++;
-
     updateControls();
   });
 
@@ -425,7 +394,7 @@ export function renderPlayView() {
 }
 
 // =========================
-// PLACEHOLDERS (pra não quebrar navegação)
+// PLACEHOLDERS
 // =========================
 export function renderSettingsView() {
   const root = document.getElementById("view-settings");
