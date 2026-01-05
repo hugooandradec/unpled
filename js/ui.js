@@ -1,5 +1,4 @@
 // js/ui.js (ES Module)
-
 import { renderCollectionView as renderCollectionModule } from "./collection.js";
 
 // =========================
@@ -20,10 +19,21 @@ function shuffle(arr) {
   return a;
 }
 
-// paths (relativos ao index.html)
-const PATH_FRAME = "./assets/cards/_frame/base_border.png";
-const pathEspadas = (rank) => `./assets/cards/base/espadas/${rank}_espadas.png`;
+// =========================
+// ASSET URLS (à prova de subpasta)
+// =========================
+// ui.js está em /js/ui.js → assets está em /assets/...
+const ASSETS_BASE = new URL("../assets/", import.meta.url);
 
+function assetUrl(relPathFromAssets) {
+  // retorna string absoluta/segura
+  return new URL(relPathFromAssets, ASSETS_BASE).toString();
+}
+
+const PATH_FRAME = assetUrl("cards/_frame/base_border.png");
+const pathEspadas = (rank) => assetUrl(`cards/base/espadas/${rank}_espadas.png`);
+
+// Só A,2,3,4 de espadas. Mão tem 5 → repete 1 aleatória.
 function buildHand5() {
   const base = [
     { rank: "A", img: pathEspadas("A") },
@@ -32,7 +42,7 @@ function buildHand5() {
     { rank: "4", img: pathEspadas("4") }
   ];
   const extra = base[Math.floor(Math.random() * base.length)];
-  return shuffle([...base, { ...extra }]); // 5 cartas
+  return shuffle([...base, { ...extra }]);
 }
 
 // =========================
@@ -72,15 +82,40 @@ function ensureUIStyles() {
   const style = document.createElement("style");
   style.id = "unpled-ui-styles";
   style.textContent = `
-    /* PLAY WRAP */
     .u-play-wrap{
       width:min(980px,92vw);
       margin:0 auto;
       padding:64px 0 40px;
       text-align:center;
     }
-    .u-play-title{
+    .u-play-head{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:14px;
       margin:0 0 18px;
+      position:relative;
+    }
+    .u-back-btn{
+      position:absolute;
+      left:0;
+      top:50%;
+      transform:translateY(-50%);
+      border:1px solid rgba(255,255,255,.18);
+      background:rgba(15,18,30,.55);
+      color:rgba(255,255,255,.92);
+      padding:10px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      font-weight:900;
+      letter-spacing:.06em;
+      text-transform:uppercase;
+      font-size:12px;
+      backdrop-filter:blur(10px);
+      box-shadow:0 18px 40px rgba(0,0,0,.35);
+    }
+    .u-play-title{
+      margin:0;
       font-weight:900;
       letter-spacing:.22em;
       text-transform:uppercase;
@@ -88,7 +123,6 @@ function ensureUIStyles() {
       opacity:.95;
     }
 
-    /* mesa verde */
     .u-table{
       width:100%;
       max-width:900px;
@@ -97,10 +131,12 @@ function ensureUIStyles() {
       padding:22px 18px 18px;
       position:relative;
       overflow:hidden;
+
       background:
         radial-gradient(circle at 30% 20%, rgba(255,255,255,.10), transparent 45%),
         radial-gradient(circle at 80% 70%, rgba(0,0,0,.35), transparent 55%),
         linear-gradient(180deg, #0f6b2f, #0b4f23);
+
       border:1px solid rgba(255,255,255,.14);
       box-shadow:0 30px 70px rgba(0,0,0,.55);
     }
@@ -114,27 +150,28 @@ function ensureUIStyles() {
       z-index:1;
     }
 
-    /* mão */
     .u-hand-row{
       position:relative;
       z-index:2;
       display:flex;
       justify-content:center;
+      align-items:center;
       gap:14px;
       flex-wrap:wrap;
       padding:10px 8px 0;
-      min-height:170px;
+      min-height:180px;
     }
 
-    /* carta flip (prefixado pra não conflitar com teu CSS) */
     .u-card{
       width:110px;
       height:156px;
       perspective:900px;
       user-select:none;
+      flex:0 0 auto;
     }
     @media (max-width: 520px){
       .u-card{ width:92px; height:132px; }
+      .u-back-btn{ left:6px; }
     }
 
     .u-card-inner{
@@ -161,7 +198,6 @@ function ensureUIStyles() {
       border:1px solid rgba(255,255,255,.18);
     }
 
-    /* verso */
     .u-back{
       background:
         radial-gradient(circle at 30% 20%, rgba(255,255,255,.12), transparent 40%),
@@ -176,12 +212,12 @@ function ensureUIStyles() {
       text-transform:uppercase;
     }
 
-    /* frente com imagem */
     .u-front{
       transform:rotateY(180deg);
-      background:rgba(0,0,0,.08);
+      background:rgba(255,255,255,.08);
       position:relative;
     }
+
     .u-art, .u-frame{
       position:absolute;
       inset:0;
@@ -196,7 +232,19 @@ function ensureUIStyles() {
       transform:scale(1.01);
     }
 
-    /* controles */
+    .u-fallback{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:900;
+      font-size:28px;
+      color:#111;
+      background:rgba(255,255,255,.92);
+      letter-spacing:.08em;
+    }
+
     .u-controls{
       position:relative;
       z-index:2;
@@ -206,6 +254,7 @@ function ensureUIStyles() {
       flex-wrap:wrap;
       margin-top:14px;
     }
+
     .u-btn{
       border:1px solid rgba(255,255,255,.18);
       background:rgba(15,18,30,.55);
@@ -234,13 +283,12 @@ function ensureUIStyles() {
 }
 
 // =========================
-// HOME (se você já tem pronto, isso só não atrapalha)
+// HOME (não mexo no teu se já tiver render)
 // =========================
 export function renderHomeView() {
+  // se você já renderiza o home em outro arquivo, ignora
   const root = document.getElementById("view-home");
   if (!root) return;
-
-  // Se o teu home já é renderizado em outro lugar, não sobrescreve.
   if (root.dataset.keep === "1") return;
   if (root.dataset.ready === "1") return;
 
@@ -257,23 +305,15 @@ export function renderHomeView() {
     </div>
   `;
 
-  root.querySelector("#goPlay")?.addEventListener("click", () => {
-    showView("view-play");
-    window.dispatchEvent(new CustomEvent("unpled:entered-play"));
-  });
-
-  root.querySelector("#goCollection")?.addEventListener("click", () => {
-    showView("view-collection");
-    window.dispatchEvent(new CustomEvent("unpled:open-collection"));
-  });
-
+  root.querySelector("#goPlay")?.addEventListener("click", () => showView("view-play"));
+  root.querySelector("#goCollection")?.addEventListener("click", () => showView("view-collection"));
   root.querySelector("#goSettings")?.addEventListener("click", () => showView("view-settings"));
 
   root.dataset.ready = "1";
 }
 
 // =========================
-// COLEÇÃO (volta a usar teu módulo real)
+// COLEÇÃO (teu módulo real)
 // =========================
 export function renderCollectionView() {
   renderCollectionModule();
@@ -301,7 +341,10 @@ export function renderPlayView() {
 
   root.innerHTML = `
     <div class="u-play-wrap">
-      <h1 class="u-play-title">JOGAR</h1>
+      <div class="u-play-head">
+        <button class="u-back-btn" id="uBack">Voltar</button>
+        <h1 class="u-play-title">JOGAR</h1>
+      </div>
 
       <div class="u-table">
         <div class="u-hand-row" id="uHand"></div>
@@ -318,6 +361,7 @@ export function renderPlayView() {
   `;
 
   const handEl = root.querySelector("#uHand");
+  const btnBack = root.querySelector("#uBack");
   const btnFlip = root.querySelector("#uFlip");
   const btnAuto = root.querySelector("#uAuto");
   const btnNew = root.querySelector("#uNew");
@@ -349,11 +393,16 @@ export function renderPlayView() {
           <div class="u-face u-back"></div>
           <div class="u-face u-front">
             <img class="u-art" alt="" />
-            <img class="u-frame" alt="frame" src="${PATH_FRAME}" />
+            <img class="u-frame" alt="frame" />
           </div>
         </div>
       </div>
     `).join("");
+
+    // seta frame em todas (garante que carregou)
+    handEl.querySelectorAll(".u-frame").forEach(img => {
+      img.src = PATH_FRAME;
+    });
   }
 
   function reveal(i) {
@@ -362,16 +411,20 @@ export function renderPlayView() {
     if (!card || !el) return;
 
     const art = el.querySelector(".u-art");
-    art.onerror = () => {
-      console.warn("Falhou imagem:", card.img);
-      // se der ruim no path, pelo menos você vê algo
-      art.remove();
-      const front = el.querySelector(".u-front");
-      front.innerHTML += `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-        font-weight:900;color:#111;background:rgba(255,255,255,.9);">
-        ${card.rank}♠
-      </div>`;
+    const front = el.querySelector(".u-front");
+
+    art.onload = () => {
+      // ok
     };
+
+    art.onerror = () => {
+      // fallback visível se path der ruim
+      const fb = document.createElement("div");
+      fb.className = "u-fallback";
+      fb.textContent = `${card.rank}♠`;
+      front.appendChild(fb);
+    };
+
     art.src = card.img;
 
     el.classList.add("u-flipped");
@@ -405,6 +458,11 @@ export function renderPlayView() {
   updateUI();
   startAuto();
 
+  btnBack.addEventListener("click", () => {
+    stopAuto();
+    showView("view-home");
+  });
+
   btnFlip.addEventListener("click", () => flipOne());
 
   btnAuto.addEventListener("click", () => {
@@ -419,15 +477,13 @@ export function renderPlayView() {
     hand = buildHand5();
     idx = 0;
     renderBacks();
-    // volta auto ligado
+
     autoOn = true;
     btnAuto.textContent = "Auto: ON";
+
     updateUI();
     startAuto();
   });
-
-  // quando sair da tela, para o timer (pra não ficar rodando oculto)
-  window.addEventListener("unpled:stop-play-timers", stopAuto, { once: true });
 }
 
 // =========================
